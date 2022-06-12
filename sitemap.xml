@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://kyonqi.github.io/posts/1.html</loc>
+    
+    <lastmod>2022-06-12</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://kyonqi.github.io/List/music/index.html</loc>
     
     <lastmod>2022-05-13</lastmod>
@@ -103,6 +110,13 @@
   
   <url>
     <loc>https://kyonqi.github.io/tags/%E6%83%B3%E6%B3%95/</loc>
+    <lastmod>2022-06-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://kyonqi.github.io/tags/%E5%8F%91%E7%99%AB/</loc>
     <lastmod>2022-06-12</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
