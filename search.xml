@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>非root用户更新cuda和torch</title>
+      <link href="/posts/3.html"/>
+      <url>/posts/3.html</url>
+      
+        <content type="html"><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>简单来说，这篇博客主要是讲，当你的远程Linux账户是没有<strong>pip、sudo</strong>等一系列权限的非root用户时，该如何升级<strong>Pytorch</strong>版本。</p><p>当然，我们需要虚拟环境的神器：<strong>Anaconda</strong>。</p><h1 id="Anaconda安装"><a href="#Anaconda安装" class="headerlink" title="Anaconda安装"></a>Anaconda安装</h1><p>Anaconda简单来说就是一个打包好的大杂烩，我们要用这个配虚拟环境，主要是为了管理方便。</p><h2 id="下载Anaconda"><a href="#下载Anaconda" class="headerlink" title="下载Anaconda"></a>下载Anaconda</h2><p>下载Anaconda可以直接去官网<a href="https://www.anaconda.com/products/distribution">Anaconda | Distribution</a>下载。</p><p>当然，我更推荐下载国内镜像源，毕竟速度更快。这里我给出北外的镜像站，速度比清华源会更快一点。<a href="https://mirrors.bfsu.edu.cn/anaconda/archive/">北京外国语大学开源软件Anaconda镜像站</a>。</p><p>在上面找到符合自己版本的Anaconda即可。<br>因为绝大部分都应该是用服务器，所以这里我我以Linux版本为例。</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/5nqOd.png" alt="1.png" border="0" width="60%/"></div><p>点击复制链接，在你想要的位置<strong>wget</strong>就行。<br>比如，</p><pre class="line-numbers language-none"><code class="language-none">mkdir anacondacd anaconda/wget https://mirrors.bfsu.edu.cn/anaconda/archive/Anaconda3-2022.05-Linux-x86_64.sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p>下载完成后，文件夹里会有个.sh文件，直接</p><pre class="line-numbers language-none"><code class="language-none">bash Anaconda3-2022.05-Linux-x86_64.sh<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>进入安装，确认安装位置时，<strong>Enter</strong>就行。</p><p>安装完成后，尝试在终端使用<strong>conda</strong>命令看有没有反应，比如<strong>conda list</strong>，如果显示<strong>command not found</strong>，那就需要配置一下环境变量。</p><h3 id="配置环境变量（如果上面显示not-found）"><a href="#配置环境变量（如果上面显示not-found）" class="headerlink" title="配置环境变量（如果上面显示not found）"></a>配置环境变量（如果上面显示not found）</h3><p>很简单，你只需要</p><pre class="line-numbers language-none"><code class="language-none">vim ~/.bashrc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>此时，按下<strong>i</strong>进入插入模式（注意左下角）<br>在最后，加上</p><pre class="line-numbers language-none"><code class="language-none">export PATH="/***/anaconda3/bin:$PATH"  #***需要替换为你的路径<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre><p>按下<strong>Esc</strong>退出插入模式，注意左下角，输入<b>:wq</b>保存修改并退出。</p><p>关于vim的基本操作，这里有一篇CSDN的博客可供参考<br><a href="https://blog.csdn.net/weixin_44992260/article/details/115342698">Linux下gedit命令及vim的基本操作</a></p><p>保存退出后，输入</p><pre class="line-numbers language-none"><code class="language-none">source ~/.bashrc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>加载修改后设置，使环境变量生效</p><p>现在，再试试<strong>conda list</strong>等conda命令，看看能否成功。</p><h1 id="Pytorch安装"><a href="#Pytorch安装" class="headerlink" title="Pytorch安装"></a>Pytorch安装</h1><p>现在，我们已经装好了Anaconda，这时候大家一定跃跃欲试，打算安装Pytorch一步到位，但是各位先别急，我们先打开Pytorch官网看看。</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/5n6d4.png" alt="2.png" border="0"></div>可以看到，在安装Pytorch之前，首先得有Python(我们在anaconda虚拟环境里可以直接创建)，还需要对应版本的CUDA，比如这里的CUDA 10.2。<p>也就是说，现在万事俱备，只欠CUDA。如果CUDA版本符合，那就直接在虚拟环境里安装即可。<br>查看CUDA版本命令</p><pre class="line-numbers language-none"><code class="language-none">nvcc -V<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>比如，我这里是</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/5nNXW.png" alt="3.png" border="0"></div>因为我前面安装了10.2版本的CUDA，这里自然是符合要求的，如果大家这里非10.2/11.3/11.6，那么需要重新安装CUDA驱动。<h2 id="CUDA-10-2安装（若版本不对应）"><a href="#CUDA-10-2安装（若版本不对应）" class="headerlink" title="CUDA 10.2安装（若版本不对应）"></a>CUDA 10.2安装（若版本不对应）</h2><p>安装CUDA也很简单，直接去老黄官网下驱动就是了。<a href="https://developer.nvidia.com/cuda-toolkit-archive">奸商老黄CUDA驱动官网</a>。但在这之前，我们得先看一下自己Linux版本</p><pre class="line-numbers language-none"><code class="language-none">cat /proc/version<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>可以看到自己的系统版本号，不过我相信绝大部分人都应该是Ubuntu 18.04</p><p>在下面一大堆的驱动里，找到我们需要的即可</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/5nSDG.png" alt="4.png" border="0"></div>我们这里需要的是<b>CUDA Toolkit 10.2</b>（当然你也可以下载你需要的驱动）<p>按照你的版本号选择即可</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/5nGSz.png" alt="5.png" border="0"></div><p>如果你也是Ubuntu 18.04，那你可以直接偷懒复制下面代码<br>（当然我也建议你先mkdir cd进一个新文件夹）</p><pre class="line-numbers language-none"><code class="language-none">wget https://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda_10.2.89_440.33.01_linux.run<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>下载完后安装</p><pre class="line-numbers language-none"><code class="language-none">sh cuda_10.2.89_440.33.01_linux.run<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>安装过程，请注意下面流程，这里因为前面装的时候没保存，我借用<b>-Rocky-</b>大佬的图来说明。</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58PB7.png" alt="6.png" border="0"></div><div align="center"><img src="https://c2.im5i.com/2022/09/13/58dMP.png" alt="7.png" border="0"></div><p>注意这里只安装CUDA Toolkit即可</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58lVD.png" alt="8.png" border="0"></div><p>选择进入<strong>Option</strong>，修改<b>Toolkit Options</b></p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58rWj.png" alt="9.png" border="0"></div><div align="center"><img src="https://c2.im5i.com/2022/09/13/58y0S.png" alt="10.png" border="0"></div><div align="center"><img src="https://c2.im5i.com/2022/09/13/58JNL.png" alt="11.png" border="0"></div><div align="center"><img src="https://c2.im5i.com/2022/09/13/58ctt.png" alt="12.png" border="0"></div><p>修改<b>Library install path</b></p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58Khl.png" alt="13.png" border="0"></div><p>最后安装</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58Vn2.png" alt="14.png" border="0"></div><p>安装完后会显示这样</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58gmn.png" alt="15.png" border="0"></div><p>安装完后，我们需要修改环境变量来使用新驱动，我们又要用到<strong>vim</strong>修改<b>.bashrc</b><br>把下面内容复制进去即可（注意改成自己的路径）</p><pre class="line-numbers language-none"><code class="language-none">export CUDA_HOME=/home/hongqi/Cuda102${CUDA_HOME:+:${CUDA_HOME}}export PATH=/home/hongqi/Cuda102/bin${PATH:+:${PATH}}export LD_LIBRARY_PATH=/home/hongqi/Cuda102/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p>现在，再试试，</p><pre class="line-numbers language-none"><code class="language-none">nvcc -V<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>看看CUDA版本是否是刚刚安装的版本。</p><h2 id="CuDNN安装"><a href="#CuDNN安装" class="headerlink" title="CuDNN安装"></a>CuDNN安装</h2><p>同样需要去老黄的官网下载驱动，不过这个下载需要登陆/注册一个账号。<br>登录后，选择对应CUDA版本的CuDNN下载就行。</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58CVU.png" alt="16.png" border="0"></div><p>还是一样的操作，复制链接然后<strong>wget</strong>下来，我们以CUDA 10.2 Linux x64为例。(当然同样推荐先mkdir + cd 进一个新的文件夹)</p><pre class="line-numbers language-none"><code class="language-none">wget https://developer.nvidia.com/compute/cudnn/secure/8.4.1/local_installers/10.2/cudnn-linux-x86_64-8.4.1.50_cuda10.2-archive.tar.xz<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>下载完成后当然就是解压</p><pre class="line-numbers language-none"><code class="language-none">#注意这里文件名可能有不同，按下载的文件名为准tar xvJf cudnn-10.2-linux-x86_64-8.4.1.50_cuda10.2-archive.tar.xz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p>解压完后当前目录下应该会有个<b>cudnn-linux-x86_64-8.4.1.50_cuda10.2-archive</b>的文件夹，我们要从这个文件夹里复制一些文件到你的<strong>CUDA安装目录</strong>。<br>具体如下：</p><pre class="line-numbers language-none"><code class="language-none"># 这里的路径是我安装时候的路径 请根据自己路径自行参照修改即可cp cudnn-linux-x86_64-8.4.1.50_cuda10.2-archive/include/cudnn*.h /home/hongqi/Cuda102/includecp -P cudnn-linux-x86_64-8.4.1.50_cuda10.2-archive/lib/libcudnn* /home/hongqi/Cuda102/lib64chmod a+r /home/hongqi/Cuda102/include/cudnn*.h /home/hongqi/Cuda102/lib64/libcudnn*<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>到目前为止，CuDNN也安装完成了，我们现在万事俱备，只欠Pytorch了。</p><p>你可以选择直接去官网对照版本之间<strong>conda</strong>下载，但我更推荐使用镜像源版本。</p><p>你只需要按照下面步骤做就能将官方源换成国内镜像源（我这里使用北外的镜像站，因为清华站速度也就那样）。</p><p>首先，还是用到我们的老朋友vim</p><pre class="line-numbers language-none"><code class="language-none">vim ~/.condarc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>同样按i进入插入模式，把下面复制进去</p><pre class="line-numbers language-none"><code class="language-none">channels:  - defaultsshow_channel_urls: truedefault_channels:  - https://mirrors.bfsu.edu.cn/anaconda/pkgs/main  - https://mirrors.bfsu.edu.cn/anaconda/pkgs/r  - https://mirrors.bfsu.edu.cn/anaconda/pkgs/msys2custom_channels:  conda-forge: https://mirrors.bfsu.edu.cn/anaconda/cloud  msys2: https://mirrors.bfsu.edu.cn/anaconda/cloud  bioconda: https://mirrors.bfsu.edu.cn/anaconda/cloud  menpo: https://mirrors.bfsu.edu.cn/anaconda/cloud  pytorch: https://mirrors.bfsu.edu.cn/anaconda/cloud  pytorch-lts: https://mirrors.bfsu.edu.cn/anaconda/cloud  simpleitk: https://mirrors.bfsu.edu.cn/anaconda/cloud<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>这样我们就添加了国内的镜像库。<br>使用<code>conda clean -i </code>清除缓存，保证使用的是镜像站索引。<br>使用<code>conda create -n myenv numpy</code>测试一下试试。</p><h2 id="下载Pytorch-1-12"><a href="#下载Pytorch-1-12" class="headerlink" title="下载Pytorch 1.12"></a>下载Pytorch 1.12</h2><p>如果你是一步一步来的，那么接下来请先创建使用你的虚拟环境，我们将在虚拟环境里安装新版本Pytorch。</p><p>这里，我简单给一些conda创建虚拟环境的命令。</p><pre class="line-numbers language-none"><code class="language-none">#创建指定python版本的环境conda create --name your_env_name python=3.7#进入创建好的某个环境conda activate your_env_name#退出当前环境conda deactivate<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>更多关于conda的命令，请详见<br><a href="https://blog.csdn.net/menc15/article/details/71477949?spm=1001.2101.3001.6650.1&amp;utm_medium=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-1.pc_relevant_default&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-1.pc_relevant_default&amp;utm_relevant_index=2">conda常用命令整理</a>。</p><p>按照刚刚提到的，创建你自己的环境，并进入，比如我这里是，</p><pre class="line-numbers language-none"><code class="language-none">conda create --name py37_torch112 python=3.7conda activate py37_torch112<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p>进入创建好的虚拟环境后，对照Pytorch官网版本安装即可，如果你是按照我的版本来，那么你只需要一下命令</p><pre class="line-numbers language-none"><code class="language-none">conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>恭喜你终于到了最后，现在让我们测试一下是否安装成功吧！<br>首先，进入虚拟环境</p><pre class="line-numbers language-none"><code class="language-none">conda activate your_env_name<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>然后，在终端输入python，进入python环境</p><pre class="line-numbers language-none"><code class="language-none">python<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>最后，输入以下代码</p><pre class="line-numbers language-none"><code class="language-none">import torchtorch.cuda.is_available()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre><p>如果返回True，恭喜你，你成功啦！</p><div align="center"><img src="https://c2.im5i.com/2022/09/13/58vzZ.jpg" alt="完结撒花" border="0" width="60%/"></div>]]></content>
+      
+      
+      <categories>
+          
+          <category> Pytorch </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> -Pytorch -Linux -Anaconda </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>坏女人生日快乐</title>
+      <link href="/posts/2.html"/>
+      <url>/posts/2.html</url>
+      
+        <content type="html"><![CDATA[<font size="5"><p>今天是<strong>坏女人</strong>生日，祝坏女人生日快乐。</p><p><img src="https://c2.im5i.com/2022/09/02/uaEW6.jpg"></p><p>其实同时也是拿来看看网站到底弄完没有(不是)。</p><p>总之，欢迎看到这篇博客的小伙伴关注关注捏。</p></font>]]></content>
+      
+      
+      <categories>
+          
+          <category> 生活 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 发癫 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>你好，世界！</title>
+      <link href="/posts/1.html"/>
+      <url>/posts/1.html</url>
+      
+        <content type="html"><![CDATA[<p>你好，世界！</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 生活 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 想法 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
