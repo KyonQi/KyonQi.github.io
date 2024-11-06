@@ -27,13 +27,13 @@
 <meta property="og:site_name" content="KyonQi">
 <meta property="og:description" content="我们要做什么？本系列博客想要用C++写一个任地域红白机模拟器，小时候玩过红白机的朋友应该很快想起来了吧，没错，经典的的超级马里奥、魂斗罗等等游戏，都是那个时代的代表作。 在本系列文章中，我们将从头构建一个红白机模拟器：从CPU指令集开始，用C++代码模拟红白机的各类硬件行为，一步步实现我们的目标。 为什么做这个“不觉得这很酷吗?作为一名理工男我觉得这太酷了，很符合我对任地狱的想象，科技并带着趣味。">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2024/10/11/hello-world/0%EF%BC%9A%E6%80%BB%E8%A7%88/00_plan.png">
+<meta property="og:image" content="http://example.com/images/00_plan.png">
 <meta property="article:published_time" content="2024-11-06T12:31:13.000Z">
-<meta property="article:modified_time" content="2024-11-06T13:16:02.997Z">
+<meta property="article:modified_time" content="2024-11-06T13:22:54.231Z">
 <meta property="article:author" content="Qi">
 <meta property="article:tag" content="NES">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/10/11/hello-world/0%EF%BC%9A%E6%80%BB%E8%A7%88/00_plan.png">
+<meta name="twitter:image" content="http://example.com/images/00_plan.png">
   
   
   
@@ -79,7 +79,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2024-11-06T12:31:13.000Z">2024-11-06</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2024-11-06T13:16:02.997Z">2024-11-06</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2024-11-06T12:31:13.000Z">2024-11-06</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2024-11-06T13:22:54.231Z">2024-11-06</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -93,7 +93,7 @@
   </div><article class="md-text content"><h2 id="我们要做什么？"><a href="#我们要做什么？" class="headerlink" title="我们要做什么？"></a>我们要做什么？</h2><p>本系列博客想要用C++写一个任地域<strong>红白机</strong>模拟器，小时候玩过红白机的朋友应该很快想起来了吧，没错，经典的的超级马里奥、魂斗罗等等游戏，都是那个时代的代表作。</p>
 <p>在本系列文章中，我们将从头构建一个红白机模拟器：从CPU指令集开始，用C++代码模拟红白机的各类硬件行为，一步步实现我们的目标。</p>
 <h2 id="为什么做这个"><a href="#为什么做这个" class="headerlink" title="为什么做这个"></a>为什么做这个</h2><p>“不觉得这很酷吗?作为一名理工男我觉得这太酷了，很符合我对任地狱的想象，科技并带着趣味。“</p>
-<h2 id="进度计划"><a href="#进度计划" class="headerlink" title="进度计划"></a>进度计划</h2><p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/2024/10/11/hello-world/0%EF%BC%9A%E6%80%BB%E8%A7%88/00_plan.png" alt="进度计划" title="Progress Plan"></p>
+<h2 id="进度计划"><a href="#进度计划" class="headerlink" title="进度计划"></a>进度计划</h2><p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/../images/00_plan.png" alt="进度计划" title="Progress Plan"></p>
 <p>我们计划按照上图的流程来实现整个项目：</p>
 <ul>
 <li>[] 实现6502 CPU的官方指令集(Official Instructions)</li>
