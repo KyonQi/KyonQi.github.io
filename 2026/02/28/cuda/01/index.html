@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
   
-  <meta name="robots" content="none">
+  
   <meta name="generator" content="Hexo 8.1.1">
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   
@@ -17,22 +17,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>KyonQi's Blog</title>
+  <title>【CUDA学习】01-GPU 架构与异构计算 - KyonQi's Blog</title>
 
   
-    <meta name="description" content="Hello World!">
-<meta property="og:type" content="website">
-<meta property="og:title" content="KyonQi&#39;s Blog">
-<meta property="og:url" content="http://kyonqi.github.io/404">
+    <meta name="description" content="1. GPU 基本架构GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在架构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CUDA学习】01-GPU 架构与异构计算">
+<meta property="og:url" content="http://kyonqi.github.io/2026/02/28/cuda/01/">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="Hello World!">
+<meta property="og:description" content="1. GPU 基本架构GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在架构">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kyonqi.github.io/images/cuda/01/GPU.png">
+<meta property="og:image" content="http://kyonqi.github.io/images/cuda/01/CUDARuntime.png">
+<meta property="article:published_time" content="2026-02-28T02:25:00.000Z">
+<meta property="article:modified_time" content="2026-02-28T02:31:48.925Z">
 <meta property="article:author" content="KyonQi">
+<meta property="article:tag" content="CUDA、异构计算、并行计算">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kyonqi.github.io/images/cuda/01/GPU.png">
   
   
   
-  
+  <meta name="keywords" content="CUDA、异构计算、并行计算">
 
   <!-- feed -->
   
@@ -44,12 +50,12 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"http://kyonqi.github.io","author":{"@type":"Person","name":"KyonQi","sameAs":[]},"name":"KyonQi's Blog","description":"Hello World!","url":"http://kyonqi.github.io"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[]},"dateCreated":"2026-02-28T03:25:00+01:00","dateModified":"2026-02-28T03:31:48+01:00","datePublished":"2026-02-28T03:25:00+01:00","description":"","headline":"【CUDA学习】01-GPU 架构与异构计算","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/02/28/cuda/01/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[]},"url":"http://kyonqi.github.io/2026/02/28/cuda/01/","keywords":"CUDA、异构计算、并行计算","image":[]}</script>
   
 </head>
 <body>
 
-<div class="l_body index" id="start" layout="404" type="undefined" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
 <header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="undefined" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">KyonQi's Blog</div><div class="sub normal cap">你好，世界！</div><div class="sub hover cap" style="opacity:0"> Hello, World!</div></a></div></header>
@@ -61,28 +67,60 @@
 <div class="widgets">
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
+
+
 <widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/02/28/cuda/01/"><span class="title">【CUDA学习】01-GPU 架构与异构计算</span></a><a class="item title" href="/2026/02/28/First-Test-Post/"><span class="title">First Test Post</span></a><a class="item title" href="/2026/02/28/hello-world/"><span class="title">Hello World</span></a></div></widget>
-
-
 </div>
 
 </div></aside><div class="l_main" id="main">
 
 
 
-<article class='md-text error-page'>
-  <h1><img id='error' src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/404/1c830bfcd517d.svg' alt='404'></h1>
-  <p class='what'>
-    <strong>
-      很抱歉，您访问的页面不存在
-    </strong>
-  </p>
-  <p class='why'>
-    可能是输入地址有误或该地址已被删除
-  </p>
-  <br><br>
-  <a class='button' id='back' href="/">返回主页</a>
-</article>
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-02-28T02:25:00.000Z">2026-02-28</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-02-28T02:31:48.925Z">2026-02-28</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>【CUDA学习】01-GPU 架构与异构计算</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="1-GPU-基本架构"><a href="#1-GPU-基本架构" class="headerlink" title="1. GPU 基本架构"></a>1. GPU 基本架构</h1><p>GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：</p>
+<p><img src="/images/cuda/01/GPU.png" alt="GPU架构"></p>
+<p>右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，<strong>GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor)</strong> ，使其在架构上对 SIMD 更加友好  [个人理解： SM 是 GPU 对 SIMD 支持的基本单元]，这都是很直觉的内容。 </p>
+<p>我们学习的 CUDA Runtime API 相对 CUDA Driver 更高层一些，CUDA 部分由 NVCC 编译器负责编译，所谓核函数，就是 CUDA Device 上运行的代码。</p>
+<p><img src="/images/cuda/01/CUDARuntime.png" alt="CUDA Runtime API"></p>
+<p><code>__global__</code> 说明符会被 NVCC 编译器识别区分为核函数 (Kernel)，为了实现从主机端向设备端发起核函数调用，CUDA C++ 扩展了标准语法，引入了执行配置（Execution Configuration）。该机制通过三尖括号 <code>&lt;&lt;&lt;A, B&gt;&gt;&gt;</code> 设定，其中 A 是 block nums, B 代表 thread nums，即：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> func&lt;&lt;&lt;num_of_blocks, num_of_threads&gt;&gt;&gt;()</span><br></pre></td></tr></table></figure>
+
+<p>那么总共分配的线程就是：num_blocks x num_threads 个</p>
+<p>说了这么多，来手写一个 CUDA Hello World 吧</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fmt/format.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">helloFromGPU</span><span class="params">()</span> </span>&#123;    </span><br><span class="line">		<span class="type">int</span> threadId = threadIdx.x;    </span><br><span class="line">		<span class="type">int</span> blockId = blockIdx.x;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello from GPU, thread ID: %d, block ID: %d\n&quot;</span>, threadId, blockId);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;    </span><br><span class="line">		std::cout &lt;&lt; fmt::format(<span class="string">&quot;主机启动：准备 GPU 调度, \n&quot;</span>);</span><br><span class="line">    helloFromGPU&lt;&lt;&lt;<span class="number">2</span>, <span class="number">4</span>&gt;&gt;&gt;();</span><br><span class="line">    <span class="keyword">auto</span> err = <span class="built_in">cudaDeviceSynchronize</span>(); <span class="comment">// wait for GPU finish    </span></span><br><span class="line">    <span class="keyword">if</span> (cudaError_t::cudaSuccess != err) &#123;        </span><br><span class="line">		    std::cerr &lt;&lt; fmt::format(<span class="string">&quot;CUDA 错误: &#123;&#125;\n&quot;</span>, <span class="built_in">cudaGetErrorString</span>(err));        </span><br><span class="line">		    <span class="keyword">return</span> <span class="number">1</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    std::cout &lt;&lt; fmt::format(<span class="string">&quot;主机完成：GPU 调度完成, \n&quot;</span>);        </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意，显然我们这是异构计算，GPU 的计算是异步的，所以需要显示的调用 <code>cudaDeviceSynchronize</code> 来等待 GPU 调用完成，不然 CPU 的程序会直接结束，详情可参考 <a target="_blank" rel="noopener" href="https://developer.download.nvidia.com/compute/DevZone/docs/html/C/doc/html/group__CUDART__DEVICE_gb76422145b5425829597ebd1003303fe.html">api官方说明</a></p>
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">主机启动：准备 GPU 调度, </span><br><span class="line">Hello from GPU, thread ID: 0, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 1, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 2, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 3, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 0, block ID: 1</span><br><span class="line">Hello from GPU, thread ID: 1, block ID: 1</span><br><span class="line">Hello from GPU, thread ID: 2, block ID: 1</span><br><span class="line">Hello from GPU, thread ID: 3, block ID: 1</span><br><span class="line">主机完成：GPU 调度完成, </span><br></pre></td></tr></table></figure></article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/02/28/First-Test-Post/">First Test Post</a></div></section></div>
+
+
 
 
 
@@ -90,7 +128,12 @@
 <footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">KyonQi</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
 </div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-</aside><div class='float-panel'>
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-GPU-%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84"><span class="toc-text">1. GPU 基本架构</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
