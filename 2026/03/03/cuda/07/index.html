@@ -136,7 +136,44 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">KyonQi</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+<footer class="page-footer footnote"><hr><div class="text"><center>
+  <span>
+    © 2024
+    <a style="font-weight: bold;" target="_blank" rel="noopener" href="https://github.com/KyonQi">KyonQi</a>
+    使用 <a style="font-weight: bold;" target="_blank" rel="noopener" href="https://github.com/FelicxFoster/hexo-theme-stellar">Stellar</a>
+    创建
+  </span>
+  <br>
+  <span>
+    本博客所有文章除特别声明外，均采用 
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener" style="text-decoration: underline;">
+      CC BY-NC-SA 4.0
+    </a> 
+    许可协议，转载请注明出处
+  </span>
+  <br>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span>总访问 <span id="busuanzi_value_site_pv" style="font-weight: bold;">--</span> 次 | 本页访问 <span id="busuanzi_value_page_pv" style="font-weight: bold;">--</span> 次</span>
+  <br>
+  <span id="runtime_span"></span>
+  <script type="text/javascript">
+    (function() {
+      function show_runtime() {
+        var start = new Date("2018/10/12 00:00:00");
+        var now = new Date();
+        var diff = now.getTime() - start.getTime();
+        var days = Math.floor(diff / (24 * 3600 * 1000));
+        var hours = Math.floor((diff % (24 * 3600 * 1000)) / (3600 * 1000));
+        var minutes = Math.floor((diff % (3600 * 1000)) / (60 * 1000));
+        var seconds = Math.floor((diff % (60 * 1000)) / 1000);
+        var years = Math.floor(days / 365);
+        days = days % 365;
+        document.getElementById('runtime_span').innerHTML = "🦉营业：" + years + " 年 " + days + " 天 " + hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒🦉";
+      }
+      setInterval(show_runtime, 1000);
+    })();
+  </script>
+</center>
 </div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
