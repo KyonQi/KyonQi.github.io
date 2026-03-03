@@ -27,11 +27,13 @@
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="7. 内存访问 —— 矩阵转置思考矩阵转置，究竟是 “行优先存储” 快，还是 “列优先存储” 快，取决于矩阵大小  💡  如果输入矩阵很大： 硬件内存控制器按 32 字节或 128 字节的缓存行（Cache Line）从全局内存抓取数据。由于是跨步读取，每个缓存行中只有 1 个有效浮点数被物理线程消耗，其余数十个字节的数据被强制载入 L1&#x2F;L2 缓存后即刻失效。那么自然是 行优先 快。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kyonqi.github.io/images/avatar.png">
 <meta property="article:published_time" content="2026-03-03T09:25:00.000Z">
 <meta property="article:modified_time" content="2026-03-03T16:27:57.317Z">
 <meta property="article:author" content="KyonQi">
 <meta property="article:tag" content="CUDA、异构计算、并行计算">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kyonqi.github.io/images/avatar.png">
   
   
   
@@ -47,7 +49,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[]},"dateCreated":"2026-03-03T10:25:00+01:00","dateModified":"2026-03-03T17:27:57+01:00","datePublished":"2026-03-03T10:25:00+01:00","description":"","headline":"【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/03/cuda/07/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[]},"url":"http://kyonqi.github.io/2026/03/03/cuda/07/","keywords":"CUDA、异构计算、并行计算","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-03T10:25:00+01:00","dateModified":"2026-03-03T17:27:57+01:00","datePublished":"2026-03-03T10:25:00+01:00","description":"","headline":"【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/03/cuda/07/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/03/cuda/07/","keywords":"CUDA、异构计算、并行计算","image":[]}</script>
   <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css">
 </head>
 <body>
@@ -55,7 +57,7 @@
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="undefined" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">KyonQi's Blog</div><div class="sub normal cap">你好，世界！</div><div class="sub hover cap" style="opacity:0"> Hello World!</div></a></div></header>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">KyonQi's Blog</div><div class="sub normal cap">你好，世界！</div><div class="sub hover cap" style="opacity:0"> Hello World!</div></a></div></header>
 
 <div class="nav-area">
 
