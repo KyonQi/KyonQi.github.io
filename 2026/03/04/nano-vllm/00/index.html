@@ -20,19 +20,19 @@
   <title>【nano-vllm 学习】00 - 基础环境配置 - KyonQi's Blog</title>
 
   
-    <meta name="description" content="0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git  先把代码 git clone 下来，uv 创建虚拟环境 1uv venv -">
+    <meta name="description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git  先把代码 git c">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】00 - 基础环境配置">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/04/nano-vllm/00/">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git  先把代码 git clone 下来，uv 创建虚拟环境 1uv venv -">
+<meta property="og:description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git  先把代码 git c">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/avatar.png">
 <meta property="article:published_time" content="2026-03-04T12:25:00.000Z">
-<meta property="article:modified_time" content="2026-03-05T13:42:21.129Z">
+<meta property="article:modified_time" content="2026-03-05T13:56:58.446Z">
 <meta property="article:author" content="KyonQi">
 <meta property="article:tag" content="LLM、vLLM、nano-vllm">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://kyonqi.github.io/images/avatar.png">
   
   
@@ -49,7 +49,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-04T13:25:00+01:00","dateModified":"2026-03-05T14:42:21+01:00","datePublished":"2026-03-04T13:25:00+01:00","description":"","headline":"【nano-vllm 学习】00 - 基础环境配置","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/04/nano-vllm/00/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/04/nano-vllm/00/","keywords":"LLM、vLLM、nano-vllm","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-04T13:25:00+01:00","dateModified":"2026-03-05T14:56:58+01:00","datePublished":"2026-03-04T13:25:00+01:00","description":"","headline":"【nano-vllm 学习】00 - 基础环境配置","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/04/nano-vllm/00/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/04/nano-vllm/00/","keywords":"LLM、vLLM、nano-vllm","thumbnailUrl":"/images/nano-vllm/vllm_纯夏.png# 必选","image":1}</script>
   <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css">
 </head>
 <body>
@@ -81,7 +81,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-04T12:25:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-05T13:42:21.129Z">2026-03-05</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-04T12:25:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-05T13:56:58.446Z">2026-03-05</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -92,7 +92,10 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><h1 id="0-环境配置"><a href="#0-环境配置" class="headerlink" title="0. 环境配置"></a>0. 环境配置</h1><p>本篇作为 <code>nano-vllm</code> 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。</p>
+  </div><article class="md-text content"><blockquote>
+<p><em>立志写出纯夏都能看懂的 nano-vllm 学习。</em></p>
+</blockquote>
+<h1 id="0-环境配置"><a href="#0-环境配置" class="headerlink" title="0. 环境配置"></a>0. 环境配置</h1><p>本篇作为 <code>nano-vllm</code> 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。</p>
 <p>我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。</p>
 <h2 id="uv-配置搭建环境"><a href="#uv-配置搭建环境" class="headerlink" title="uv 配置搭建环境"></a>uv 配置搭建环境</h2><hr>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:GeeeekExplorer/nano-vllm.git</span><br></pre></td></tr></table></figure>
@@ -122,7 +125,8 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoConfig</span><br><span class="line"></span><br><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Config</span>:</span><br><span class="line">		...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__post_init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">assert</span> os.path.isdir(<span class="variable language_">self</span>.model)</span><br><span class="line">        <span class="keyword">assert</span> <span class="variable language_">self</span>.kvcache_block_size % <span class="number">256</span> == <span class="number">0</span></span><br><span class="line">        <span class="keyword">assert</span> <span class="number">1</span> &lt;= <span class="variable language_">self</span>.tensor_parallel_size &lt;= <span class="number">8</span></span><br><span class="line">        <span class="variable language_">self</span>.hf_config = AutoConfig.from_pretrained(<span class="variable language_">self</span>.model)</span><br><span class="line">        <span class="comment"># === 修改点！===</span></span><br><span class="line">        <span class="variable language_">self</span>.hf_config.rope_scaling = <span class="literal">None</span>  <span class="comment"># disable RoPE scaling in HuggingFace config</span></span><br><span class="line">        <span class="variable language_">self</span>.max_model_len = <span class="built_in">min</span>(<span class="variable language_">self</span>.max_model_len, <span class="variable language_">self</span>.hf_config.max_position_embeddings)</span><br><span class="line">        <span class="keyword">assert</span> <span class="variable language_">self</span>.max_num_batched_tokens &gt;= <span class="variable language_">self</span>.max_model_len</span><br></pre></td></tr></table></figure>
 
 <p><em><strong>这下再， <code>python main.p</code>  就真的 Okay 了。</strong></em></p>
-</article>
+<p><img src="/images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg" alt="纯夏"></p>
+<center>我也要学吗？</center></article>
 <div class="article-footer">
     <section id="license">
       <div class="header"><span>许可协议</span></div>
