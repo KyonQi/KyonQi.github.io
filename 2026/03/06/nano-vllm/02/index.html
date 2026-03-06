@@ -17,29 +17,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>【CUDA学习】09-GPU 流异步并行 - KyonQi's Blog</title>
+  <title>【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习 - KyonQi's Blog</title>
 
   
-    <meta name="description" content="9. 流异步并行">
+    <meta name="description" content="我们以“自顶向下”的顺序，逐层解析 nano-vllm 的实现细节，这一节将详细解析 用户接口层 的实现细节。 example.py我们从使用体验出发，先主动思考下，如果是你来做一个推理引擎，当输入 prompts 后，应当发生些什么：  prompts 转为可用的 tokens：首先当然是把 List[String] 结构化并分词后，转化为 token 对应的 List[Ids]； tokens">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【CUDA学习】09-GPU 流异步并行">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/03/cuda/09/">
+<meta property="og:title" content="【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习">
+<meta property="og:url" content="http://kyonqi.github.io/2026/03/06/nano-vllm/02/">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="9. 流异步并行">
+<meta property="og:description" content="我们以“自顶向下”的顺序，逐层解析 nano-vllm 的实现细节，这一节将详细解析 用户接口层 的实现细节。 example.py我们从使用体验出发，先主动思考下，如果是你来做一个推理引擎，当输入 prompts 后，应当发生些什么：  prompts 转为可用的 tokens：首先当然是把 List[String] 结构化并分词后，转化为 token 对应的 List[Ids]； tokens">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/avatar.png">
-<meta property="article:published_time" content="2026-03-03T11:25:00.000Z">
-<meta property="article:modified_time" content="2026-03-05T18:37:47.638Z">
+<meta property="article:published_time" content="2026-03-06T15:30:00.000Z">
+<meta property="article:modified_time" content="2026-03-06T15:31:44.196Z">
 <meta property="article:author" content="KyonQi">
-<meta property="article:tag" content="CUDA">
-<meta property="article:tag" content="并行计算">
-<meta property="article:tag" content="异构计算">
-<meta name="twitter:card" content="summary">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="nano-vllm">
+<meta property="article:tag" content="vLLM">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://kyonqi.github.io/images/avatar.png">
   
   
   
-  <meta name="keywords" content="CUDA,异构计算,并行计算">
+  <meta name="keywords" content="LLM,vLLM,nano-vllm">
 
   <!-- feed -->
   
@@ -51,7 +51,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-03T12:25:00+01:00","dateModified":"2026-03-05T19:37:47+01:00","datePublished":"2026-03-03T12:25:00+01:00","description":"","headline":"【CUDA学习】09-GPU 流异步并行","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/03/cuda/09/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/03/cuda/09/","keywords":"CUDA, 异构计算, 并行计算","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-06T16:30:00+01:00","dateModified":"2026-03-06T16:31:44+01:00","datePublished":"2026-03-06T16:30:00+01:00","description":"","headline":"【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/06/nano-vllm/02/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/06/nano-vllm/02/","keywords":"LLM, vLLM, nano-vllm","thumbnailUrl":"/images/nano-vllm/大开门.jpg# 必选","image":1}</script>
   <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css">
 </head>
 <body>
@@ -79,22 +79,110 @@
 
 
 
-<div class="article banner top">
+<div class="article banner top"><img class="lazy bg" data-src="/images/nano-vllm/vllm_纯夏.png">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/CUDA/">CUDA</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-03T11:25:00.000Z">2026-03-03</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-05T18:37:47.638Z">2026-03-05</time></span></div></div></div>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/nano-vLLM/">nano-vLLM</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-06T15:30:00.000Z">2026-03-06</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-06T15:31:44.196Z">2026-03-06</time></span></div></div></div>
     
     <div class="bottom only-title">
       
       <div class="text-area">
-        <h1 class="text title"><span>【CUDA学习】09-GPU 流异步并行</span></h1>
+        <h1 class="text title"><span>【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习</span></h1>
         
       </div>
     </div>
     
   </div>
-  </div><article class="md-text content"><h1 id="9-流异步并行"><a href="#9-流异步并行" class="headerlink" title="9. 流异步并行"></a>9. 流异步并行</h1></article>
+  </div><article class="md-text content"><p>我们以“自顶向下”的顺序，逐层解析 nano-vllm 的实现细节，这一节将详细解析 <em><strong>用户接口层</strong></em> 的实现细节。</p>
+<h2 id="example-py"><a href="#example-py" class="headerlink" title="example.py"></a>example.py</h2><p>我们从使用体验出发，先主动思考下，如果是你来做一个推理引擎，当输入 prompts 后，应当发生些什么：</p>
+<ol>
+<li><strong>prompts 转为可用的 tokens</strong>：首先当然是把 <code>List[String]</code> 结构化并分词后，转化为 token 对应的 <code>List[Ids]</code>；</li>
+<li><strong>tokens 加入引擎调度器的任务队列</strong>：既然有了 tokens ，自然是准备开始推理了，做一个任务队列接受所有需要完成的任务是基础的设计思路；</li>
+<li><strong>引擎逐步驱动执行推理</strong>：只要任务队列还有任务，那引擎就应该在 while 循环里逐步驱动完成所有任务；</li>
+<li><strong>用户拿到 prompt 对应输出的 text 文本</strong>：推理完成后自然应该拿到对应文本。</li>
+</ol>
+<p>相信大伙在大框架下想的步骤都大差不差，事实上，nano-vllm 也基本是这么做的，其中，第 1、4 步的部分代码是在用户接口层就能轻松实现的，第 2、3 步的具体实现则放在了引擎调度层等之下的部分 【这里划分是显然的，就不费口舌了】。</p>
+<h3 id="结构化-prompt"><a href="#结构化-prompt" class="headerlink" title="结构化 prompt"></a>结构化 prompt</h3><p>如果各位有尝试过将 QQ 机器人接入大模型聊天 API 的朋友，相信对这步不会陌生，很多时候我们在写<em><strong>机器人角色卡</strong></em>的时候，总是要指定各种 role，比如，</p>
+<p><img src="/images/nano-vllm/02/catgirl_prompt.png" alt="猫娘角色卡.png"></p>
+<center>猫娘角色卡</center>
+
+<p><img src="/images/nano-vllm/%E5%A4%A7%E5%BC%80%E9%97%A8.jpg" alt="大开门.png"></p>
+<center>真棒！！！</center>
+
+<p>事实上，在大模型推理的时候，我们也是这么干的，所有的 prompt 都应当首先转化成一个 <code>List[Dict]</code> 类型，其中，<code>Dict</code> 应当是像我们上面 <code>{role : content}</code> 格式，role 用来声明身份（比如，user 代表用户的输入，system 代表系统的输入），content 则是对应的具体内容。</p>
+<p>我们都知道，不同 LLM 训练时<strong>文本内容</strong>都是独特的，如果没有一个标准化的输入格式，那么写代码的人就得带上痛苦面具为各个模型定制化输入格式了，这在 2026 显然是不能忍受的，而且在通过标准化的格式内容后，模型能够更合理且标准地输出相关内容，其性能也能有所保证。</p>
+<p>在具体代码中，我们使用 <code>transformers</code> 库中的 <code>AutoTokenizer</code> 来实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> nanovllm <span class="keyword">import</span> LLM, SamplingParams</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    path = os.path.expanduser(<span class="string">&quot;~/Project/vllm/huggingface/Qwen3-0.6B/&quot;</span>)</span><br><span class="line">    tokenizer = AutoTokenizer.from_pretrained(path) <span class="comment"># 实例对应模型的 tokenizer</span></span><br><span class="line">		......</span><br><span class="line">    prompts = [</span><br><span class="line">        <span class="string">&quot;introduce yourself&quot;</span>,</span><br><span class="line">        <span class="string">&quot;list all prime numbers within 100&quot;</span>,</span><br><span class="line">    ]</span><br><span class="line">    <span class="comment"># 把 prompts 结构化成标准格式</span></span><br><span class="line">    prompts = [</span><br><span class="line">        tokenizer.apply_chat_template(</span><br><span class="line">            [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: prompt&#125;],</span><br><span class="line">            tokenize=<span class="literal">False</span>,</span><br><span class="line">            add_generation_prompt=<span class="literal">True</span>,</span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">for</span> prompt <span class="keyword">in</span> prompts</span><br><span class="line">    ]</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+
+<p>代码里，我们首先 <code>[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}]</code> 把 prompt 按照我们上面说的要求整理好，然后使用模型特定的 <code>tokenizer.apply_chat_template</code> 转换成标准格式，那具体长什么样呢？我们完全可以开一个 Debug 看下：</p>
+<p><img src="/images/nano-vllm/02/chatFormat_Demo.png" alt="结构化prompt.png"></p>
+<center>结构化的 prompt 展示</center>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 转换后</span></span><br><span class="line"><span class="number">0</span>: <span class="string">&#x27;&lt;|im_start|&gt;user\nintroduce yourself&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant&#x27;</span></span><br><span class="line"><span class="number">1</span>: <span class="string">&#x27;&lt;|im_start|&gt;user\nlist all prime numbers within 100&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，用户的输入内容 (user) 在标准化后被 <code>&lt;|im_start|&gt;...&lt;|im_end|&gt;</code> 标记，而模型的输出 (assistant) 则是在 <code>&lt;|im_start|&gt;assistant</code> 后等待模型自己去补全 (因为我们设置了 <code>add_generation_prompt=True</code>，大家可以自行试试如果设置成 False 会怎么样 ) ；<code>tokenize=False</code> 的设置则保证此时 prompt 依然只是 Python str 而非 token ids，转换成具体 ids 的过程被延后到推理时再进行。</p>
+<h3 id="执行推理"><a href="#执行推理" class="headerlink" title="执行推理"></a>执行推理</h3><p><code>example.py</code> 剩下的部分就很直观显然了（也没剩下什么了），无非就是实例化生成 prompt 所需要的 取样参数 (<code>SamplingParams()</code>)，输出结果而已：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    path = os.path.expanduser(<span class="string">&quot;~/Project/vllm/huggingface/Qwen3-0.6B/&quot;</span>)</span><br><span class="line">    tokenizer = AutoTokenizer.from_pretrained(path)</span><br><span class="line">    llm = LLM(path, enforce_eager=<span class="literal">True</span>, tensor_parallel_size=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    sampling_params = SamplingParams(temperature=<span class="number">0.6</span>, max_tokens=<span class="number">256</span>)</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment"># 调用 generate 拿到输出结果 (batch)</span></span><br><span class="line">    outputs = llm.generate(prompts, sampling_params)</span><br><span class="line">		<span class="comment"># 对应 Prompt 输出相应的结果</span></span><br><span class="line">    <span class="keyword">for</span> prompt, output <span class="keyword">in</span> <span class="built_in">zip</span>(prompts, outputs):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Prompt: <span class="subst">&#123;prompt!r&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Completion: <span class="subst">&#123;output[<span class="string">&#x27;text&#x27;</span>]!r&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="SampingParams-py"><a href="#SampingParams-py" class="headerlink" title="SampingParams.py"></a>SampingParams.py</h2><p>熟悉 LLM 基础结构的朋友应该知道，在根据 prompt 生成 token 的过程中，会有一些采样参数需要调整来确定：</p>
+<ul>
+<li>如何采用 token (<code>temperature</code>)</li>
+<li>何时停止生成 token (<code>max_tokens</code> &amp; <code>ingore_eos</code>)</li>
+</ul>
+<p>这里的数据类文件就是定义了这些参数</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>temperature</code></td>
+<td>缩放 <code>logits</code>：<code>logits / temperature</code>，影响采样的随机性</td>
+<td>必须 &gt; 0（不支持贪婪采样）</td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>生成的最大 token 数，到达后强制停止</td>
+<td>默认 64</td>
+</tr>
+<tr>
+<td><code>ignore_eos</code></td>
+<td>设为 True 时，即使生成了 EOS token 也不停止</td>
+<td>用于需要固定长度输出的场景</td>
+</tr>
+</tbody></table>
+<p>实例化的 <code>SampingParams</code> 类跟随相应的 prompts 被传入给 LLM 推理引擎中，并在将一个个 prompt 转换成 <code>Sequence</code> 的时候被拷贝走，  在最后 token 生成与选择的时候被使用，其中，<code>temperature</code> 参数是比较有意思的一个，我们会具体讲讲。</p>
+<h3 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h3><p>在模型最后一层，LM Head（通常为就是一层 FC）负责将 Hidden States 映射到词汇表大小的向量空间：</p>
+<p>*设当前时刻的隐藏层向量为 $h\in \mathbb{R}^d$（其中 d 为模型的隐藏层维度），LM Head 的权重矩阵为 $W\in \mathbb{R}^{|V|\times d}$（其中 $∣V∣$ 为词汇表的大小）。*计算得到的输出向量 z 称为 logits：</p>
+<p>$$<br>z &#x3D; Wh \in \mathbb{R}^{|V|}<br>$$</p>
+<p>这 $∣V∣$ 维的连续向量包含了模型对每个可能词汇的概率(未归一化)。，logits 需要经过 Softmax 归一化换为真正的概率：</p>
+<p>$$<br>P(X_i)&#x3D;\frac{exp(z_i)}{\sum_jexp(z_j)}<br>$$</p>
+<p>通常而言，我们会选择 <a target="_blank" rel="noopener" href="https://juejin.cn/post/7494557082890141708">Top-p Sampling</a> 的采样方法，通过计算累积概率，并设置一个阈值 p ，截取累积概率达到 p 的最小 token 集合，来实现动态截取 token 的数量的目的。</p>
+<p>当我们在 Softmax 引入 Temperature T 后，我们便有了缩放模型生成的原始未归一化的 logits 的能力，直接改变最终生成 token 的概率分布形态，更加主动的影响 token 截取数量。此时，新的公式如下：</p>
+<p>$$<br>P(X_i)&#x3D;\frac{exp(z_i &#x2F; T)}{\sum_jexp(z_j&#x2F;T)}<br>$$</p>
+<p>可以看到，就是除以了一个 T，</p>
+<ul>
+<li><strong>当 T&#x3D;1 时：</strong><br>公式等同于标准 softmax 函数。此时不产生缩放干预；</li>
+<li><strong>当 T&lt;1 时（降低随机性）：</strong><br>将 logits 除以小于 1 的数值，会扩大 logits 之间的绝对差值。经过指数运算后，高分与低分之间的差异被呈指数级放大。概率质量会高度集中于排名靠前的 token。当 T→0 时，基本等效于 argmax 运算，系统将确定性地选择最高分 token；</li>
+<li><strong>当 T&gt;1 时（增加随机性）：</strong><br>将 logits 除以大于 1 的数值，会衰减 logits 之间的绝对差值。指数运算后的结果使整体概率分布被压缩并变得平缓，逐渐趋近于均匀分布。原本处于边缘位置、低 logit 的候选 token 会被分配到相对更高的采样概率，从而提高了统计上的不确定性。</li>
+</ul>
+<p>感觉还是有点抽象？我们来代码画个图直接展示下 T 的影响：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">apply_temperature_and_softmax</span>(<span class="params">logits, temperature=<span class="number">1.0</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;应用 Temperature 缩放并转换为概率分布&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 减去最大值以避免溢出，数学上等价于 softmax(logits / temperature)</span></span><br><span class="line">    scaled_logits = logits / temperature</span><br><span class="line">    exp_logits = np.exp(scaled_logits - np.<span class="built_in">max</span>(scaled_logits))</span><br><span class="line">    <span class="keyword">return</span> exp_logits / np.<span class="built_in">sum</span>(exp_logits)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">apply_top_p_and_renormalize</span>(<span class="params">probs, p=<span class="number">0.9</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;应用 Top-p 截断并重新归一化&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 假设输入 probs 已按降序排列</span></span><br><span class="line">    cumulative_probs = np.cumsum(probs)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 寻找累积概率首次达到 p 的索引</span></span><br><span class="line">    cutoff_index = np.argmax(cumulative_probs &gt;= p) </span><br><span class="line">    </span><br><span class="line">    truncated_probs = np.zeros_like(probs)</span><br><span class="line">    truncated_probs[:cutoff_index + <span class="number">1</span>] = probs[:cutoff_index + <span class="number">1</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 重新归一化</span></span><br><span class="line">    <span class="keyword">return</span> truncated_probs / np.<span class="built_in">sum</span>(truncated_probs), cutoff_index + <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 生成模拟的 Logits (已排序，模拟词表大小为 50)</span></span><br><span class="line">vocab_size = <span class="number">50</span></span><br><span class="line">logits = np.log(np.linspace(<span class="number">100</span>, <span class="number">1</span>, vocab_size)) </span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 对比不同 Temperature 和 Top-p 参数的效果</span></span><br><span class="line">temperatures = [<span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">2.0</span>]</span><br><span class="line">top_p_threshold = <span class="number">0.90</span></span><br><span class="line"></span><br><span class="line">fig, axes = plt.subplots(<span class="number">1</span>, <span class="number">3</span>, figsize=(<span class="number">18</span>, <span class="number">5</span>), sharey=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i, temp <span class="keyword">in</span> <span class="built_in">enumerate</span>(temperatures):</span><br><span class="line">    <span class="comment"># 计算基础概率</span></span><br><span class="line">    base_probs = apply_temperature_and_softmax(logits, temperature=temp)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 应用 Top-p 并获取保留的 token 数量</span></span><br><span class="line">    final_probs, num_kept = apply_top_p_and_renormalize(base_probs, p=top_p_threshold)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 绘图</span></span><br><span class="line">    x_axis = np.arange(vocab_size)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 未被保留的 token (灰色)</span></span><br><span class="line">    axes[i].bar(x_axis[num_kept:], base_probs[num_kept:], color=<span class="string">&#x27;lightgray&#x27;</span>, label=<span class="string">&#x27;Truncated by Top-p&#x27;</span>)</span><br><span class="line">    <span class="comment"># 被保留并重新归一化的 token (蓝色)</span></span><br><span class="line">    axes[i].bar(x_axis[:num_kept], final_probs[:num_kept], color=<span class="string">&#x27;steelblue&#x27;</span>, label=<span class="string">&#x27;Retained &amp; Re-normalized&#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    axes[i].set_title(<span class="string">f&quot;Temperature: <span class="subst">&#123;temp&#125;</span>\n(Kept <span class="subst">&#123;num_kept&#125;</span> tokens for Top-p=<span class="subst">&#123;top_p_threshold&#125;</span>)&quot;</span>, fontsize=<span class="number">11</span>)</span><br><span class="line">    axes[i].set_xlabel(<span class="string">&quot;Token Index (Sorted)&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> i == <span class="number">0</span>:</span><br><span class="line">        axes[i].set_ylabel(<span class="string">&quot;Probability&quot;</span>)</span><br><span class="line">    axes[i].legend()</span><br><span class="line"></span><br><span class="line">plt.tight_layout(pad=<span class="number">2.0</span>)</span><br><span class="line">fig.subplots_adjust(left=<span class="number">0.08</span>)</span><br><span class="line">plt.savefig(<span class="string">&quot;temperature_top_p_effects.png&quot;</span>, dpi=<span class="number">300</span>)  <span class="comment"># 保存图像</span></span><br><span class="line"><span class="comment"># plt.show()</span></span><br></pre></td></tr></table></figure>
+
+<p>代码如下图所示：</p>
+<p>可以看到，随着 T 的增大，概率密度会越发平缓，使得最终保留的可选择的 token 数量会增多，从而最后在选择输出的 token 的时候，有更大可能选择其他 (相对尾部) 的 token。 </p>
+<p><img src="/images/nano-vllm/02/temperature_top_p_effects.png" alt="temperature_top_p_effects.png"></p>
+<center>T 对 token 数量选取的影响</center>
+
+<h2 id="Config-py"><a href="#Config-py" class="headerlink" title="Config.py"></a>Config.py</h2><p>这个数据类就是一些基础的配置选项了，这里我们做一个简单介绍，等到具体使用到的时候再做详细的解释：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Config</span>:</span><br><span class="line">    model: <span class="built_in">str</span>                              <span class="comment"># 模型路径</span></span><br><span class="line">    max_num_batched_tokens: <span class="built_in">int</span> = <span class="number">16384</span>     <span class="comment"># 一个 batch 最多处理多少 token</span></span><br><span class="line">    max_num_seqs: <span class="built_in">int</span> = <span class="number">512</span>                 <span class="comment"># 一个 batch 最多多少条序列</span></span><br><span class="line">    max_model_len: <span class="built_in">int</span> = <span class="number">4096</span>              <span class="comment"># 单条序列最大长度（prompt + 生成）</span></span><br><span class="line">    gpu_memory_utilization: <span class="built_in">float</span> = <span class="number">0.9</span>    <span class="comment"># GPU 显存使用上限（90%）</span></span><br><span class="line">    tensor_parallel_size: <span class="built_in">int</span> = <span class="number">1</span>          <span class="comment"># 张量并行卡数</span></span><br><span class="line">    enforce_eager: <span class="built_in">bool</span> = <span class="literal">False</span>            <span class="comment"># 禁用 CUDA Graph，强制 eager 执行</span></span><br><span class="line">    hf_config: AutoConfig | <span class="literal">None</span> = <span class="literal">None</span>    <span class="comment"># HuggingFace 模型配置（自动加载）</span></span><br><span class="line">    eos: <span class="built_in">int</span> = -<span class="number">1</span>                          <span class="comment"># EOS token id（初始化后由 tokenizer 填充）</span></span><br><span class="line">    kvcache_block_size: <span class="built_in">int</span> = <span class="number">256</span>          <span class="comment"># 每个 KV cache block 包含多少 token</span></span><br><span class="line">    num_kvcache_blocks: <span class="built_in">int</span> = -<span class="number">1</span>           <span class="comment"># 总共分配多少 block（运行时自动计算）</span></span><br></pre></td></tr></table></figure>
+
+<p>注意下，这里 <code>max_num_bacthed_tokens</code> 限制的是整个 batch 在推理的时候能够处理的 token 总量，而 <code>max_num_seqs</code> 限制的是 sequence 数量，目前大家可以简单将 sequence 理解为一条输入的 prompt。</p>
+</article>
 <div class="article-footer">
     <section id="license">
       <div class="header"><span>许可协议</span></div>
@@ -105,7 +193,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/03/04/nano-vllm/00/">【nano-vllm 学习】00 - 基础环境配置</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/03/03/cuda/08/">【CUDA学习】08-GPU 共享内存</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/03/05/nano-vllm/01/">【nano-vllm 学习】01 - 框架整体概览</a></div></section></div>
 
 
 
@@ -171,7 +259,7 @@
 
 
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#9-%E6%B5%81%E5%BC%82%E6%AD%A5%E5%B9%B6%E8%A1%8C"><span class="toc-text">9. 流异步并行</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 10.5h8M8 14h5.5M17 3.338A9.95 9.95 0 0 0 12 2C6.477 2 2 6.477 2 12c0 1.6.376 3.112 1.043 4.453c.178.356.237.763.134 1.148l-.595 2.226a1.3 1.3 0 0 0 1.591 1.592l2.226-.596a1.63 1.63 0 0 1 1.149.133A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10c0-1.821-.487-3.53-1.338-5"/></svg><span>参与讨论</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#example-py"><span class="toc-text">example.py</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96-prompt"><span class="toc-text">结构化 prompt</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E6%8E%A8%E7%90%86"><span class="toc-text">执行推理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SampingParams-py"><span class="toc-text">SampingParams.py</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Temperature"><span class="toc-text">Temperature</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Config-py"><span class="toc-text">Config.py</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 10.5h8M8 14h5.5M17 3.338A9.95 9.95 0 0 0 12 2C6.477 2 2 6.477 2 12c0 1.6.376 3.112 1.043 4.453c.178.356.237.763.134 1.148l-.595 2.226a1.3 1.3 0 0 0 1.591 1.592l2.226-.596a1.63 1.63 0 0 1 1.149.133A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10c0-1.821-.487-3.53-1.338-5"/></svg><span>参与讨论</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
