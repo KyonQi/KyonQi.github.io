@@ -17,19 +17,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习 - KyonQi's Blog</title>
+  <title>【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1 - KyonQi's Blog</title>
 
   
     <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  我们依然将按照“自顶向下”的顺序逐层解析 nano-vllm 的实现细节。进入到引擎调度层后，代码开始稍微有些复杂了，因此这一层我打算做多篇来写，也方便各位阅读理解。在本节，我们将重点解析 llm_engine.py 以及 sequence.py 的主要思路，并辅助以部分调度器 scheduler.py 的代码。 我们在本节的目标很简单：从整体上了解引擎调度和">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习">
+<meta property="og:title" content="【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/09/nano-vllm/03/">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  我们依然将按照“自顶向下”的顺序逐层解析 nano-vllm 的实现细节。进入到引擎调度层后，代码开始稍微有些复杂了，因此这一层我打算做多篇来写，也方便各位阅读理解。在本节，我们将重点解析 llm_engine.py 以及 sequence.py 的主要思路，并辅助以部分调度器 scheduler.py 的代码。 我们在本节的目标很简单：从整体上了解引擎调度和">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/avatar.png">
 <meta property="article:published_time" content="2026-03-09T15:30:00.000Z">
-<meta property="article:modified_time" content="2026-03-09T15:42:02.142Z">
+<meta property="article:modified_time" content="2026-03-09T15:42:41.611Z">
 <meta property="article:author" content="KyonQi">
 <meta property="article:tag" content="LLM">
 <meta property="article:tag" content="nano-vllm">
@@ -51,7 +51,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-09T16:30:00+01:00","dateModified":"2026-03-09T16:42:02+01:00","datePublished":"2026-03-09T16:30:00+01:00","description":"","headline":"【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/09/nano-vllm/03/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/09/nano-vllm/03/","keywords":"LLM, vLLM, nano-vllm","thumbnailUrl":"/images/nano-vllm/vllm_纯夏.png# 必选","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-09T16:30:00+01:00","dateModified":"2026-03-09T16:42:41+01:00","datePublished":"2026-03-09T16:30:00+01:00","description":"","headline":"【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/09/nano-vllm/03/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/09/nano-vllm/03/","keywords":"LLM, vLLM, nano-vllm","thumbnailUrl":"/images/nano-vllm/vllm_纯夏.png# 必选","image":1}</script>
   <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css">
 </head>
 <body>
@@ -70,7 +70,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/09/nano-vllm/03/"><span class="title">【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习</span></a><a class="item title" href="/2026/03/06/nano-vllm/02/"><span class="title">【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习</span></a><a class="item title" href="/2026/03/05/nano-vllm/01/"><span class="title">【nano-vllm 学习】01 - 框架整体概览</span></a><a class="item title" href="/2026/03/03/cuda/09/"><span class="title">【CUDA学习】09-GPU 流异步并行</span></a><a class="item title" href="/2026/03/03/cuda/08/"><span class="title">【CUDA学习】08-GPU 共享内存</span></a><a class="item title" href="/2026/03/03/cuda/07/"><span class="title">【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考</span></a><a class="item title" href="/2026/03/02/cuda/06/"><span class="title">【CUDA学习】06-GPU CUDA 内存管理</span></a><a class="item title" href="/2026/03/02/cuda/05/"><span class="title">【CUDA学习】05-GPU 分支分化 & 循环展开</span></a><a class="item title" href="/2026/03/02/cuda/04/"><span class="title">【CUDA学习】04-GPU 进一步学习硬件结构</span></a><a class="item title" href="/2026/03/01/cuda/03/"><span class="title">【CUDA学习】03-GPU CUDA内部线程索引</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/09/nano-vllm/04/"><span class="title">【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2</span></a><a class="item title" href="/2026/03/09/nano-vllm/03/"><span class="title">【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1</span></a><a class="item title" href="/2026/03/06/nano-vllm/02/"><span class="title">【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习</span></a><a class="item title" href="/2026/03/05/nano-vllm/01/"><span class="title">【nano-vllm 学习】01 - 框架整体概览</span></a><a class="item title" href="/2026/03/03/cuda/09/"><span class="title">【CUDA学习】09-GPU 流异步并行</span></a><a class="item title" href="/2026/03/03/cuda/08/"><span class="title">【CUDA学习】08-GPU 共享内存</span></a><a class="item title" href="/2026/03/03/cuda/07/"><span class="title">【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考</span></a><a class="item title" href="/2026/03/02/cuda/06/"><span class="title">【CUDA学习】06-GPU CUDA 内存管理</span></a><a class="item title" href="/2026/03/02/cuda/05/"><span class="title">【CUDA学习】05-GPU 分支分化 & 循环展开</span></a><a class="item title" href="/2026/03/02/cuda/04/"><span class="title">【CUDA学习】04-GPU 进一步学习硬件结构</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -83,12 +83,12 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/nano-vLLM/">nano-vLLM</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-09T15:30:00.000Z">2026-03-09</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-09T15:42:02.142Z">2026-03-09</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-09T15:30:00.000Z">2026-03-09</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-09T15:42:41.611Z">2026-03-09</time></span></div></div></div>
     
     <div class="bottom only-title">
       
       <div class="text-area">
-        <h1 class="text title"><span>【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习</span></h1>
+        <h1 class="text title"><span>【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1</span></h1>
         
       </div>
     </div>
@@ -162,7 +162,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/03/06/nano-vllm/02/">【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/03/09/nano-vllm/04/">【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/03/06/nano-vllm/02/">【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习</a></div></section></div>
 
 
 
