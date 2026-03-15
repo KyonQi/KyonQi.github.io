@@ -20,16 +20,16 @@
   <title>【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2 - KyonQi's Blog</title>
 
   
-    <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  在回答这个问题之前，让我们先简单回顾下 transformer 的 decoder 中 attention 的计算 $$Attention(Q,K,V)&#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V$$ 其中， $Q&#x3D;XW_Q,\quad K&#x3D;XW_K,\quad V+XW_V$，分别是输入序列对权重矩阵的线">
+    <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  Scheduler我们继续来解析“引擎调度层”的另一个重要角色：调度器 scheduler (废话，调度器能不重要)。 简单来说，scheduler 的功能是：在每一次 step() 推理时，决定让哪些 sequence 进入 GPU 执行计算，并且在显存不足时执行抢占功能。 从代码实现来看，scheduler 的思路很简单直接：  维护两个队列： waiti">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/14/nano-vllm/04/">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  在回答这个问题之前，让我们先简单回顾下 transformer 的 decoder 中 attention 的计算 $$Attention(Q,K,V)&#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V$$ 其中， $Q&#x3D;XW_Q,\quad K&#x3D;XW_K,\quad V+XW_V$，分别是输入序列对权重矩阵的线">
+<meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  Scheduler我们继续来解析“引擎调度层”的另一个重要角色：调度器 scheduler (废话，调度器能不重要)。 简单来说，scheduler 的功能是：在每一次 step() 推理时，决定让哪些 sequence 进入 GPU 执行计算，并且在显存不足时执行抢占功能。 从代码实现来看，scheduler 的思路很简单直接：  维护两个队列： waiti">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/avatar.png">
 <meta property="article:published_time" content="2026-03-14T15:30:00.000Z">
-<meta property="article:modified_time" content="2026-03-14T22:43:11.760Z">
+<meta property="article:modified_time" content="2026-03-15T22:09:23.593Z">
 <meta property="article:author" content="KyonQi">
 <meta property="article:tag" content="LLM">
 <meta property="article:tag" content="nano-vllm">
@@ -51,7 +51,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-14T16:30:00+01:00","dateModified":"2026-03-14T23:43:11+01:00","datePublished":"2026-03-14T16:30:00+01:00","description":"","headline":"【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/14/nano-vllm/04/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/14/nano-vllm/04/","keywords":"LLM, vLLM, nano-vllm","thumbnailUrl":"/images/nano-vllm/vllm_呆呆兽.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-14T16:30:00+01:00","dateModified":"2026-03-15T23:09:23+01:00","datePublished":"2026-03-14T16:30:00+01:00","description":"","headline":"【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/14/nano-vllm/04/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/14/nano-vllm/04/","keywords":"LLM, vLLM, nano-vllm","thumbnailUrl":"/images/nano-vllm/vllm_呆呆兽.png","image":1}</script>
   <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css">
 </head>
 <body>
@@ -83,7 +83,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/nano-vLLM/">nano-vLLM</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-14T15:30:00.000Z">2026-03-14</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-14T22:43:11.760Z">2026-03-14</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-14T15:30:00.000Z">2026-03-14</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-15T22:09:23.593Z">2026-03-15</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -97,10 +97,76 @@
   </div><article class="md-text content"><blockquote>
 <p><em><strong>立志写出让纯夏都能看懂的教程讲解</strong></em></p>
 </blockquote>
-<p>在回答这个问题之前，让我们先简单回顾下 transformer 的 <strong>decoder 中 attention</strong> 的计算</p>
-<p>$$<br>Attention(Q,K,V)&#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V<br>$$</p>
-<p>其中， $Q&#x3D;XW_Q,\quad K&#x3D;XW_K,\quad V+XW_V$，分别是输入序列对权重矩阵的线性投影。</p>
-</article>
+<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>我们继续来解析“引擎调度层”的另一个重要角色：调度器 scheduler (废话，调度器能不重要)。</p>
+<p>简单来说，scheduler 的功能是：<strong>在每一次 <code>step()</code> 推理时，决定让哪些 sequence 进入 GPU 执行计算，并且在显存不足时执行抢占功能。</strong></p>
+<p>从代码实现来看，scheduler 的思路很简单直接：</p>
+<ul>
+<li>维护两个队列：<ul>
+<li>waiting 队列：<strong>存储等待被执行 prefill 的 Sequence；</strong></li>
+<li>running 队列：<strong>存储已经拿到 Block Cache 后续需要 decode 的 Sequence。</strong></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Scheduler</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, config: Config</span>):</span><br><span class="line">        <span class="variable language_">self</span>.max_num_seqs = config.max_num_seqs <span class="comment"># 一次 Step 最多执行的 Seq 数量</span></span><br><span class="line">        <span class="variable language_">self</span>.max_num_batched_tokens = config.max_num_batched_tokens <span class="comment"># 一次 Step 最多能够有的 token 数量</span></span><br><span class="line">        <span class="variable language_">self</span>.eos = config.eos</span><br><span class="line">        <span class="variable language_">self</span>.block_manager = BlockManager(config.num_kvcache_blocks, config.kvcache_block_size)</span><br><span class="line">        <span class="comment"># 维护两个工作队列</span></span><br><span class="line">        <span class="variable language_">self</span>.waiting: deque[<span class="type">Sequence</span>] = deque()</span><br><span class="line">        <span class="variable language_">self</span>.running: deque[<span class="type">Sequence</span>] = deque()</span><br></pre></td></tr></table></figure>
+
+<p>对于一条 Sequence 任务来说，它的生命周期基本是这样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">add_request()</span><br><span class="line">    ↓</span><br><span class="line">waiting</span><br><span class="line">    ↓ schedule(prefill)</span><br><span class="line">running</span><br><span class="line">    ↓ 多次 schedule(decode) + postprocess()</span><br><span class="line">FINISHED</span><br></pre></td></tr></table></figure>
+
+<p>所谓人如其名，对于 scheduler 调度器而言，最重要的部分当然就是它的调度方法 <code>schedule()</code> ，我们在 3.1 节已经简单对这个方法做了解析。具体而言，它返回两个值：</p>
+<ul>
+<li><code>scheduled_seqs</code>：本步要送去执行的 Sequence 列表 list[Sequence]</li>
+<li><code>is_prefill</code>：本步是 prefill 还是 decode 阶段</li>
+</ul>
+<p>也就是说，Scheduler 每次调度只做一种模式：</p>
+<ul>
+<li>要么这一步跑 <strong>prefill</strong></li>
+<li>要么这一步跑 <strong>decode</strong></li>
+</ul>
+<p>不会混着来。</p>
+<h3 id="prefill-schedule"><a href="#prefill-schedule" class="headerlink" title="prefill schedule"></a>prefill schedule</h3><p>我们首先截取了关于 prefill 阶段的调度选取，在是否选择这个 sequence 进入 prefill 阶段中，会有几个简单直观的约束：</p>
+<ul>
+<li><code>max_num_seqs</code>：本轮 prefill 最多拉多少条请求进来；</li>
+<li><code>max_num_batched_tokens</code>：本轮 prefill 的总 token 数不能太大，否则一次 forward 太重；</li>
+<li><code>can_allocate(seq)</code>：即使 seqs 条数、token 都没超，也可能因为 KV cache block 不够而不能接收这条请求。</li>
+</ul>
+<p>通过简单约束后，对于每个 sequence,</p>
+<ol>
+<li>为 sequence 分配 block： <code>self.block_manager.allocate(seq)</code> ；</li>
+<li>统计真实计算的 token 数量：<code>num_batched_tokens += len(seq) - seq.num_cached_tokens</code> 。注意，如果前缀本身在 kv-cache 中，自然不需要重复计算，这里涉及到 prefix cache 的机制了，我们等后面回头再讨论。</li>
+<li>状态切换：<code>seq.status = SequenceStatus.RUNNING</code> ，加入到 running 队列中。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Scheduler</span>:</span><br><span class="line">		...</span><br><span class="line">		</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">schedule</span>(<span class="params">self</span>) -&gt; <span class="built_in">tuple</span>[<span class="built_in">list</span>[<span class="type">Sequence</span>], <span class="built_in">bool</span>]:</span><br><span class="line">        <span class="comment"># prefill</span></span><br><span class="line">        scheduled_seqs = []</span><br><span class="line">        num_seqs = <span class="number">0</span></span><br><span class="line">        num_batched_tokens = <span class="number">0</span></span><br><span class="line">        <span class="keyword">while</span> <span class="variable language_">self</span>.waiting <span class="keyword">and</span> num_seqs &lt; <span class="variable language_">self</span>.max_num_seqs:</span><br><span class="line">            seq = <span class="variable language_">self</span>.waiting[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> num_batched_tokens + <span class="built_in">len</span>(seq) &gt; <span class="variable language_">self</span>.max_num_batched_tokens <span class="keyword">or</span> <span class="keyword">not</span> <span class="variable language_">self</span>.block_manager.can_allocate(seq):</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            num_seqs += <span class="number">1</span></span><br><span class="line">            <span class="variable language_">self</span>.block_manager.allocate(seq) <span class="comment"># 为这条 sequence 分配显存 block</span></span><br><span class="line">            num_batched_tokens += <span class="built_in">len</span>(seq) - seq.num_cached_tokens <span class="comment"># 统计需要计算的 token 数量，注意，如果前缀本身在 kv-cache 中，自然不需要重复计算，这里涉及到 prefix cache</span></span><br><span class="line">            seq.status = SequenceStatus.RUNNING</span><br><span class="line">            <span class="variable language_">self</span>.waiting.popleft()</span><br><span class="line">            <span class="variable language_">self</span>.running.append(seq)</span><br><span class="line">            scheduled_seqs.append(seq)</span><br><span class="line">        <span class="keyword">if</span> scheduled_seqs:</span><br><span class="line">            <span class="keyword">return</span> scheduled_seqs, <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># decode</span></span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="decode-schedule"><a href="#decode-schedule" class="headerlink" title="decode schedule"></a>decode schedule</h3><p>在完全没有需要 prefill 的新请求后，scheduler 会选择 decode 的 seqs 进行调度：</p>
+<p>当然，decode 也有一些类似约束，这里就不再重复了，我们这里只讨论一些比较关键的：</p>
+<ul>
+<li>检查当前 seq 的 block 是否还能添加新的 token：<code>while not self.block_manager.can_append(seq):</code> 我们都知道 decode 阶段，每次 <code>step()</code> 都会往序列里写入一个新的 token，如果：<ul>
+<li>当前 block 没有满，则直接写入即可；</li>
+<li>如果当前 block 满了，则需要 <code>block_manager</code> 为我们分配新的 block，倘若没有新的空闲了，则需要 scheduler 抢占，即：释放别的 sequence 占用的 block，给当前 sequence 腾出空间。</li>
+</ul>
+</li>
+</ul>
+<h3 id="抢占"><a href="#抢占" class="headerlink" title="抢占"></a>抢占</h3><p>抢占是 scheduler 实现调度的很重要的策略，保证了推理时 Sequence 的计算不会出现爆显存的危机：</p>
+<aside>
+👉
+
+<p>抢占策略：</p>
+<p><em><strong>如果 running 队列还有其他 sequence，则优先抢占位于队尾的 sequence；如果不存在了，则当前 sequence 的 Block 会被释放，sequence 进入 waiting 阶段，后续也不会进入 decode，而是要从 prefill 重新开始。</strong></em></p>
+</aside>
+
+<p>在代码上：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Scheduler</span>():</span><br><span class="line">		...	</span><br><span class="line">		<span class="keyword">def</span> <span class="title function_">preempt</span>(<span class="params">self, seq: <span class="type">Sequence</span></span>):</span><br><span class="line">		    seq.status = SequenceStatus.WAITING</span><br><span class="line">		    <span class="variable language_">self</span>.block_manager.deallocate(seq)</span><br><span class="line">		    <span class="variable language_">self</span>.waiting.appendleft(seq)</span><br></pre></td></tr></table></figure>
+
+<p>这里注意一个点：我们对于被抢占的 sequence，释放完显存后是重新返回 waiting 队首的，因为：</p>
+<aside>
+😤
+
+<p><em><strong>被抢占的序列不是被丢弃了，而是下次优先 prefill。</strong></em></p>
+</aside>
+
+<p>为什么是 prefill 呢？当然是因为我们已经将这个 sequence 的 KV-Cache 完全释放了，恢复自然得从 prefill 开始，毕竟巧妇难为无米之炊。</p>
+<p>还有个小细节是这里的 <code>while-else</code> 结构，代表 else 下面的内容只有在没有发生 break 的时候执行。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Scheduler</span>():</span><br><span class="line">		...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">schedule</span>(<span class="params">self</span>) -&gt; <span class="built_in">tuple</span>[<span class="built_in">list</span>[<span class="type">Sequence</span>], <span class="built_in">bool</span>]:</span><br><span class="line">        <span class="comment"># prefill</span></span><br><span class="line">        scheduled_seqs = []</span><br><span class="line">        num_seqs = <span class="number">0</span></span><br><span class="line">        num_batched_tokens = <span class="number">0</span></span><br><span class="line">        </span><br><span class="line">				...</span><br><span class="line">        <span class="comment"># decode</span></span><br><span class="line">        <span class="keyword">while</span> <span class="variable language_">self</span>.running <span class="keyword">and</span> num_seqs &lt; <span class="variable language_">self</span>.max_num_seqs:</span><br><span class="line">            seq = <span class="variable language_">self</span>.running.popleft()</span><br><span class="line">            <span class="keyword">while</span> <span class="keyword">not</span> <span class="variable language_">self</span>.block_manager.can_append(seq):</span><br><span class="line">                <span class="keyword">if</span> <span class="variable language_">self</span>.running:</span><br><span class="line">                    <span class="variable language_">self</span>.preempt(<span class="variable language_">self</span>.running.pop())</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="variable language_">self</span>.preempt(seq)</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">		            <span class="comment"># 注意这里 while-else：表明下面内容只有在没有发生 break 的时候执行</span></span><br><span class="line">                num_seqs += <span class="number">1</span></span><br><span class="line">                <span class="variable language_">self</span>.block_manager.may_append(seq)</span><br><span class="line">                scheduled_seqs.append(seq)</span><br><span class="line">        <span class="keyword">assert</span> scheduled_seqs</span><br><span class="line">        <span class="variable language_">self</span>.running.extendleft(<span class="built_in">reversed</span>(scheduled_seqs))</span><br><span class="line">        <span class="keyword">return</span> scheduled_seqs, <span class="literal">False</span></span><br></pre></td></tr></table></figure></article>
 <div class="article-footer">
     <section id="license">
       <div class="header"><span>许可协议</span></div>
@@ -173,7 +239,12 @@
 </center>
 </div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-</aside><div class='float-panel'>
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Scheduler"><span class="toc-text">Scheduler</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#prefill-schedule"><span class="toc-text">prefill schedule</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#decode-schedule"><span class="toc-text">decode schedule</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%A2%E5%8D%A0"><span class="toc-text">抢占</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 10.5h8M8 14h5.5M17 3.338A9.95 9.95 0 0 0 12 2C6.477 2 2 6.477 2 12c0 1.6.376 3.112 1.043 4.453c.178.356.237.763.134 1.148l-.595 2.226a1.3 1.3 0 0 0 1.591 1.592l2.226-.596a1.63 1.63 0 0 1 1.149.133A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10c0-1.821-.487-3.53-1.338-5"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
