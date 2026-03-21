@@ -17,29 +17,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>【CUDA学习】05-GPU 分支分化 & 循环展开 - KyonQi's Blog</title>
+  <title>【nano-vllm 学习】05 - 自顶向下的引擎调度层源码学习3 - KyonQi's Blog</title>
 
   
-    <meta name="description" content="5. 分支分化 &amp; 循环展开分支分化待续，编译器已经做了相当多工作 循环展开待续">
+    <meta name="description" content="立志写出让纯夏都能看懂的教程讲解">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【CUDA学习】05-GPU 分支分化 &amp; 循环展开">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/02/cuda/05/">
+<meta property="og:title" content="【nano-vllm 学习】05 - 自顶向下的引擎调度层源码学习3">
+<meta property="og:url" content="http://kyonqi.github.io/2026/03/21/nano-vllm/05/">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="5. 分支分化 &amp; 循环展开分支分化待续，编译器已经做了相当多工作 循环展开待续">
+<meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/avatar.png">
-<meta property="article:published_time" content="2026-03-02T20:25:00.000Z">
-<meta property="article:modified_time" content="2026-03-05T18:37:38.929Z">
+<meta property="article:published_time" content="2026-03-21T15:30:00.000Z">
+<meta property="article:modified_time" content="2026-03-21T20:16:34.670Z">
 <meta property="article:author" content="KyonQi">
-<meta property="article:tag" content="CUDA">
-<meta property="article:tag" content="并行计算">
-<meta property="article:tag" content="异构计算">
-<meta name="twitter:card" content="summary">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="nano-vllm">
+<meta property="article:tag" content="vLLM">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://kyonqi.github.io/images/avatar.png">
   
   
   
-  <meta name="keywords" content="CUDA,异构计算,并行计算">
+  <meta name="keywords" content="LLM,vLLM,nano-vllm">
 
   <!-- feed -->
   
@@ -51,7 +51,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-02T21:25:00+01:00","dateModified":"2026-03-05T19:37:38+01:00","datePublished":"2026-03-02T21:25:00+01:00","description":"","headline":"【CUDA学习】05-GPU 分支分化 & 循环展开","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/02/cuda/05/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/02/cuda/05/","keywords":"CUDA, 异构计算, 并行计算","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"KyonQi","sameAs":[],"image":"/images/avatar.png"},"dateCreated":"2026-03-21T16:30:00+01:00","dateModified":"2026-03-21T21:16:34+01:00","datePublished":"2026-03-21T16:30:00+01:00","description":"","headline":"【nano-vllm 学习】05 - 自顶向下的引擎调度层源码学习3","mainEntityOfPage":{"@type":"WebPage","@id":"http://kyonqi.github.io/2026/03/21/nano-vllm/05/"},"publisher":{"@type":"Organization","name":"KyonQi","sameAs":[],"image":"/images/avatar.png","logo":{"@type":"ImageObject","url":"/images/avatar.png"}},"url":"http://kyonqi.github.io/2026/03/21/nano-vllm/05/","keywords":"LLM, vLLM, nano-vllm","thumbnailUrl":"/images/nano-vllm/vllm_纯夏.png","image":1}</script>
   <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css">
 </head>
 <body>
@@ -79,23 +79,24 @@
 
 
 
-<div class="article banner top">
+<div class="article banner top"><img class="lazy bg" data-src="/images/nano-vllm/vllm_纯夏.png">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/CUDA/">CUDA</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-02T20:25:00.000Z">2026-03-02</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-05T18:37:38.929Z">2026-03-05</time></span></div></div></div>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/nano-vLLM/">nano-vLLM</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-21T15:30:00.000Z">2026-03-21</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-21T20:16:34.670Z">2026-03-21</time></span></div></div></div>
     
     <div class="bottom only-title">
       
       <div class="text-area">
-        <h1 class="text title"><span>【CUDA学习】05-GPU 分支分化 & 循环展开</span></h1>
+        <h1 class="text title"><span>【nano-vllm 学习】05 - 自顶向下的引擎调度层源码学习3</span></h1>
         
       </div>
     </div>
     
   </div>
-  </div><article class="md-text content"><h1 id="5-分支分化-循环展开"><a href="#5-分支分化-循环展开" class="headerlink" title="5. 分支分化 &amp; 循环展开"></a>5. 分支分化 &amp; 循环展开</h1><h2 id="分支分化"><a href="#分支分化" class="headerlink" title="分支分化"></a>分支分化</h2><p>待续，编译器已经做了相当多工作</p>
-<h2 id="循环展开"><a href="#循环展开" class="headerlink" title="循环展开"></a>循环展开</h2><p>待续</p>
+  </div><article class="md-text content"><blockquote>
+<p><em><strong>立志写出让纯夏都能看懂的教程讲解</strong></em></p>
+</blockquote>
 </article>
 <div class="article-footer">
     <section id="license">
@@ -107,7 +108,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/03/02/cuda/06/">【CUDA学习】06-GPU CUDA 内存管理</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/03/02/cuda/04/">【CUDA学习】04-GPU 进一步学习硬件结构</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/03/14/nano-vllm/04/">【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2</a></div></section></div>
 
 
 
@@ -169,12 +170,7 @@
 </center>
 </div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-<div class="widgets">
-
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E5%88%86%E6%94%AF%E5%88%86%E5%8C%96-%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80"><span class="toc-text">5. 分支分化 &amp; 循环展开</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%94%AF%E5%88%86%E5%8C%96"><span class="toc-text">分支分化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80"><span class="toc-text">循环展开</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 10.5h8M8 14h5.5M17 3.338A9.95 9.95 0 0 0 12 2C6.477 2 2 6.477 2 12c0 1.6.376 3.112 1.043 4.453c.178.356.237.763.134 1.148l-.595 2.226a1.3 1.3 0 0 0 1.591 1.592l2.226-.596a1.63 1.63 0 0 1 1.149.133A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10c0-1.821-.487-3.53-1.338-5"/></svg><span>参与讨论</span></a></div></widget>
-</div></aside><div class='float-panel'>
+</aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
