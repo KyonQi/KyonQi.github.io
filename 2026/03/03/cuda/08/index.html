@@ -17,14 +17,14 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="8. 共享内存基础概念Bank conflict —— 以矩阵转置为例  其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。 硬件层面的 Bank Conflict 是如何发生的？硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读取&#x2F;写">
+    <meta name="description" content="8. 共享内存  基础概念  Bank conflict —— 以矩阵转置为例   其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。  硬件层面的 Bank Conflict 是如何发生的？ 硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【CUDA学习】08-GPU 共享内存">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/03/cuda/08/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="8. 共享内存基础概念Bank conflict —— 以矩阵转置为例  其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。 硬件层面的 Bank Conflict 是如何发生的？硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读取&#x2F;写">
+<meta property="og:description" content="8. 共享内存  基础概念  Bank conflict —— 以矩阵转置为例   其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。  硬件层面的 Bank Conflict 是如何发生的？ 硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/cuda/08/bank_conflict.png">
+<meta property="og:image" content="http://kyonqi.github.io/2026/03/03/cuda/08/images/cuda/08/bank_conflict.png">
 <meta property="article:published_time" content="2026-03-03T10:25:00.000Z">
 <meta property="article:modified_time" content="2026-03-05T18:37:45.653Z">
 <meta property="article:author" content="KyonQi">
@@ -32,13 +32,14 @@
 <meta property="article:tag" content="并行计算">
 <meta property="article:tag" content="异构计算">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/cuda/08/bank_conflict.png">
+<meta name="twitter:image" content="http://kyonqi.github.io/2026/03/03/cuda/08/images/cuda/08/bank_conflict.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
 <link rel="stylesheet" href="/css/style.css">
 
   <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+      <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.css" integrity="sha384-tTgKLjMYmJr94v8qu2PE5MUGSMbyN2xiH266JUB3gpm8vnnJywd1dWSOEfrFz+YI" crossorigin="anonymous">
     
 <script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
 
@@ -150,7 +151,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="toc-number">1.</span> <span class="toc-text">8. 共享内存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">基础概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bank-conflict-%E2%80%94%E2%80%94-%E4%BB%A5%E7%9F%A9%E9%98%B5%E8%BD%AC%E7%BD%AE%E4%B8%BA%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text">Bank conflict —— 以矩阵转置为例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84-Bank-Conflict-%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%91%E7%94%9F%E7%9A%84%EF%BC%9F"><span class="toc-number">1.2.1.</span> <span class="toc-text">硬件层面的 Bank Conflict 是如何发生的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E9%80%A0%E5%87%BA%E5%AE%8C%E7%BE%8E%E7%9A%84%E5%86%85%E5%AD%98%EF%BC%9F"><span class="toc-number">1.2.2.</span> <span class="toc-text">为什么不直接造出完美的内存？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E7%BB%B4%E7%BA%BF%E7%A8%8B%E5%9D%97%EF%BC%8CWarp-%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%87%E5%88%86%E7%9A%84%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">二维线程块，Warp 是怎么切分的？</span></a></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="toc-number">1.</span> <span class="toc-text"> 8. 共享内存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text"> 基础概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bank-conflict-%E4%BB%A5%E7%9F%A9%E9%98%B5%E8%BD%AC%E7%BD%AE%E4%B8%BA%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text"> Bank conflict —— 以矩阵转置为例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84-bank-conflict-%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%91%E7%94%9F%E7%9A%84"><span class="toc-number">1.2.1.</span> <span class="toc-text"> 硬件层面的 Bank Conflict 是如何发生的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E9%80%A0%E5%87%BA%E5%AE%8C%E7%BE%8E%E7%9A%84%E5%86%85%E5%AD%98"><span class="toc-number">1.2.2.</span> <span class="toc-text"> 为什么不直接造出完美的内存？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E7%BB%B4%E7%BA%BF%E7%A8%8B%E5%9D%97warp-%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%87%E5%88%86%E7%9A%84"><span class="toc-number">1.3.</span> <span class="toc-text"> 二维线程块，Warp 是怎么切分的？</span></a></li></ol></li></ol>
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -231,12 +232,16 @@
     <div class="hr-line"></div>
     
     <div class="e-content article-entry" itemprop="articleBody">
-        <h1 id="8-共享内存"><a href="#8-共享内存" class="headerlink" title="8. 共享内存"></a>8. 共享内存</h1><h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><h2 id="Bank-conflict-——-以矩阵转置为例"><a href="#Bank-conflict-——-以矩阵转置为例" class="headerlink" title="Bank conflict —— 以矩阵转置为例"></a>Bank conflict —— 以矩阵转置为例</h2><hr>
-<p><img src="/images/cuda/08/bank_conflict.png" alt="BankConflict"></p>
+        <h1 id="8-共享内存"><a class="markdownIt-Anchor" href="#8-共享内存"></a> 8. 共享内存</h1>
+<h2 id="基础概念"><a class="markdownIt-Anchor" href="#基础概念"></a> 基础概念</h2>
+<h2 id="bank-conflict-以矩阵转置为例"><a class="markdownIt-Anchor" href="#bank-conflict-以矩阵转置为例"></a> Bank conflict —— 以矩阵转置为例</h2>
+<hr />
+<p><img src="images/cuda/08/bank_conflict.png" alt="BankConflict" /></p>
 <p>其实之所以会有所谓的冲突与解决方法，和 <strong>硬件实现</strong> 是息息相关的。</p>
-<h3 id="硬件层面的-Bank-Conflict-是如何发生的？"><a href="#硬件层面的-Bank-Conflict-是如何发生的？" class="headerlink" title="硬件层面的 Bank Conflict 是如何发生的？"></a>硬件层面的 Bank Conflict 是如何发生的？</h3><p>硬件上，这一大块共享内存，被切分成了 <strong>32 个独立的小 SRAM 模块</strong>，这就是 <strong>Bank</strong>。</p>
+<h3 id="硬件层面的-bank-conflict-是如何发生的"><a class="markdownIt-Anchor" href="#硬件层面的-bank-conflict-是如何发生的"></a> 硬件层面的 Bank Conflict 是如何发生的？</h3>
+<p>硬件上，这一大块共享内存，被切分成了 <strong>32 个独立的小 SRAM 模块</strong>，这就是 <strong>Bank</strong>。</p>
 <ul>
-<li><strong>独立工作：</strong> 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以<strong>同时</strong>响应各自的读取&#x2F;写入请求。</li>
+<li><strong>独立工作：</strong> 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以<strong>同时</strong>响应各自的读取/写入请求。</li>
 <li><strong>交叉编址：</strong> 内存地址被像发扑克牌一样，轮流分配给这 32 个 Bank（即地址 0 在 Bank 0，地址 1 在 Bank 1… 循环往复）。</li>
 </ul>
 <p>在线程和这 32 个 Bank 之间，硬件中布置了一个极其复杂的电路网络，叫做 <strong>Crossbar Switch（交叉开关）</strong>。它的作用就像一个超级电话交换机，负责在瞬间将 32 个线程的请求路由到对应的 Bank 上。</p>
@@ -247,19 +252,23 @@
 <li><strong>硬件的无奈之举（串行化）：</strong> 面对指向同一个 Bank 的多个不同地址请求，Crossbar 的硬件仲裁器（Arbiter）只能强制介入，把这些请求打散成多个时钟周期来执行。有几个请求挤在同一个 Bank，就要耗费几个周期（这就是 n-way conflict）。</li>
 </ul>
 <blockquote>
-<p>《Unifying Primary Cache, Scratch, and Register File Memories in a Throughput Processor》<br>在论文的第 3 节（Baseline GPU Architecture）<br><strong>“Each SM contains 64KB of cache and 64KB of shared memory. Each of these structures is composed of 32 2KB banks, and each bank supports one 4-byte read and one 4-byte write per cycle… Shared memory supports scatter&#x2F;gather reads and writes, subject to the limitation of one access per bank per cycle.”</strong><br>解读：这段官方描述完美印证了我之前的解释：共享内存由 32 个独立的 Bank 组成，而每个 Bank 在一个时钟周期内只能支持一次读操作（one read per cycle）。如果有多个读请求发向同一个 Bank，必然无法在一个周期内完成，这就是 Bank Conflict 的物理根源。</p>
+<p>《Unifying Primary Cache, Scratch, and Register File Memories in a Throughput Processor》<br />
+在论文的第 3 节（Baseline GPU Architecture）<br />
+<strong>“Each SM contains 64KB of cache and 64KB of shared memory. Each of these structures is composed of 32 2KB banks, and each bank supports one 4-byte read and one 4-byte write per cycle… Shared memory supports scatter/gather reads and writes, subject to the limitation of one access per bank per cycle.”</strong><br />
+解读：这段官方描述完美印证了我之前的解释：共享内存由 32 个独立的 Bank 组成，而每个 Bank 在一个时钟周期内只能支持一次读操作（one read per cycle）。如果有多个读请求发向同一个 Bank，必然无法在一个周期内完成，这就是 Bank Conflict 的物理根源。</p>
 </blockquote>
-<h3 id="为什么不直接造出完美的内存？"><a href="#为什么不直接造出完美的内存？" class="headerlink" title="为什么不直接造出完美的内存？"></a>为什么不直接造出完美的内存？</h3><p>你可能会问：“既然单端口 SRAM 会导致排队，那直接造一个拥有 <strong>32 个读写端口</strong>的 SRAM 不就永远没有 Bank Conflict 了吗？”</p>
+<h3 id="为什么不直接造出完美的内存"><a class="markdownIt-Anchor" href="#为什么不直接造出完美的内存"></a> 为什么不直接造出完美的内存？</h3>
+<p>你可能会问：“既然单端口 SRAM 会导致排队，那直接造一个拥有 <strong>32 个读写端口</strong>的 SRAM 不就永远没有 Bank Conflict 了吗？”</p>
 <p>答案很现实：<strong>成本、面积和功耗。</strong></p>
 <p>在集成电路设计中，给 SRAM 每增加一个端口，其内部连线复杂度和所占用的硅片面积几乎呈<strong>平方级增加</strong>。一个真正的 32 端口 SRAM，它的体积和发热量会极其恐怖。如果 GPU 采用这种设计，原本能塞下上万个流处理器（CUDA Cores）的芯片，可能连几百个都塞不下了。</p>
-<h2 id="二维线程块，Warp-是怎么切分的？"><a href="#二维线程块，Warp-是怎么切分的？" class="headerlink" title="二维线程块，Warp 是怎么切分的？"></a>二维线程块，Warp 是怎么切分的？</h2><hr>
+<h2 id="二维线程块warp-是怎么切分的"><a class="markdownIt-Anchor" href="#二维线程块warp-是怎么切分的"></a> 二维线程块，Warp 是怎么切分的？</h2>
+<hr />
 <mark>
 无论你在代码里把 Thread Block 定义成 1 维、2 维还是 3 维，GPU 硬件在底层统统都会把它们“拍扁”成一个 1 维的线性队列，然后每 32 个线程切一刀，划分为一个 Warp。
 </mark>
-
-
-<p>GPU 拍扁多维数组的规则是：<strong><code>x</code> 维度变化最快，然后是 <code>y</code> 维度，最后是 <code>z</code> 维度。</strong>（这和 C&#x2F;C++ 中二维数组在内存中的按行存储是一样的）。</p>
-<p>对于二维 Block，线程的线性索引（Linear Thread ID）计算公式为：<br><code>线性 ID = threadIdx.y * blockDim.x + threadIdx.x</code></p>
+<p>GPU 拍扁多维数组的规则是：<strong><code>x</code> 维度变化最快，然后是 <code>y</code> 维度，最后是 <code>z</code> 维度。</strong>（这和 C/C++ 中二维数组在内存中的按行存储是一样的）。</p>
+<p>对于二维 Block，线程的线性索引（Linear Thread ID）计算公式为：<br />
+<code>线性 ID = threadIdx.y * blockDim.x + threadIdx.x</code></p>
 
     </div>
     <footer class="article-footer">
@@ -335,7 +344,7 @@
   <div class="sidebar-wrap">
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="toc-number">1.</span> <span class="toc-text">8. 共享内存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">基础概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bank-conflict-%E2%80%94%E2%80%94-%E4%BB%A5%E7%9F%A9%E9%98%B5%E8%BD%AC%E7%BD%AE%E4%B8%BA%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text">Bank conflict —— 以矩阵转置为例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84-Bank-Conflict-%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%91%E7%94%9F%E7%9A%84%EF%BC%9F"><span class="toc-number">1.2.1.</span> <span class="toc-text">硬件层面的 Bank Conflict 是如何发生的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E9%80%A0%E5%87%BA%E5%AE%8C%E7%BE%8E%E7%9A%84%E5%86%85%E5%AD%98%EF%BC%9F"><span class="toc-number">1.2.2.</span> <span class="toc-text">为什么不直接造出完美的内存？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E7%BB%B4%E7%BA%BF%E7%A8%8B%E5%9D%97%EF%BC%8CWarp-%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%87%E5%88%86%E7%9A%84%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">二维线程块，Warp 是怎么切分的？</span></a></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="toc-number">1.</span> <span class="toc-text"> 8. 共享内存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text"> 基础概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bank-conflict-%E4%BB%A5%E7%9F%A9%E9%98%B5%E8%BD%AC%E7%BD%AE%E4%B8%BA%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text"> Bank conflict —— 以矩阵转置为例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84-bank-conflict-%E6%98%AF%E5%A6%82%E4%BD%95%E5%8F%91%E7%94%9F%E7%9A%84"><span class="toc-number">1.2.1.</span> <span class="toc-text"> 硬件层面的 Bank Conflict 是如何发生的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E9%80%A0%E5%87%BA%E5%AE%8C%E7%BE%8E%E7%9A%84%E5%86%85%E5%AD%98"><span class="toc-number">1.2.2.</span> <span class="toc-text"> 为什么不直接造出完美的内存？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E7%BB%B4%E7%BA%BF%E7%A8%8B%E5%9D%97warp-%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%87%E5%88%86%E7%9A%84"><span class="toc-number">1.3.</span> <span class="toc-text"> 二维线程块，Warp 是怎么切分的？</span></a></li></ol></li></ol>
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -461,7 +470,7 @@
           url: "http://kyonqi.github.io/2026/03/03/cuda/08/",
           excerpt: "",
           description: "",
-          stripContent: "8. 共享内存基础概念Bank conflict —— 以矩阵转置为例  其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。 硬件层面的 Bank Conflict 是如何发生的？硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读取&amp;#x2F;写入请求。 交叉编址： 内存地址被像发扑克牌一样，轮流分配给这 32 个 Bank（即地址 0 在 B",
+          stripContent: " 8. 共享内存  基础概念  Bank conflict —— 以矩阵转置为例   其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。  硬件层面的 Bank Conflict 是如何发生的？ 硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读取/写入请求。 交叉编址： 内存地址被像发扑克牌一样，轮流分配给这 32 个 Bank（即地址 0 ",
           date: "Tue Mar 03 2026 11:25:00 GMT+0100",
           updated: "Thu Mar 05 2026 19:37:45 GMT+0100",
           cover: "/images/banner.webp",
@@ -527,7 +536,13 @@
   }
 </script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.js" integrity="sha384-MWNUH0WmtsYGhn2cbH6ELRCbf9LG3QDqCC+gqPB3IBNO35xjZK3Ejb6oONRpDbPg" crossorigin="anonymous" defer data-pjax></script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" defer onload="renderMathInElement(_$(&#39;article&#39;), {delimiters: [{left: &#39;$$&#39;, right: &#39;$$&#39;, display: true},{left: &#39;$&#39;, right: &#39;$&#39;, display: false}]});" data-pjax></script>
+
+  
 
 
   </body>

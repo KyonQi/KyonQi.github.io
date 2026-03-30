@@ -17,12 +17,12 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="1. GPU 基本架构GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在架构">
+    <meta name="description" content="1. GPU 基本架构 GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【CUDA学习】01-GPU 架构与异构计算">
 <meta property="og:url" content="http://kyonqi.github.io/2026/02/28/cuda/01/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="1. GPU 基本架构GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在架构">
+<meta property="og:description" content="1. GPU 基本架构 GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/cuda/01/GPU.png">
 <meta property="og:image" content="http://kyonqi.github.io/images/cuda/01/CUDARuntime.png">
@@ -40,6 +40,7 @@
 <link rel="stylesheet" href="/css/style.css">
 
   <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+      <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.css" integrity="sha384-tTgKLjMYmJr94v8qu2PE5MUGSMbyN2xiH266JUB3gpm8vnnJywd1dWSOEfrFz+YI" crossorigin="anonymous">
     
 <script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
 
@@ -151,7 +152,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-GPU-%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">1. GPU 基本架构</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-gpu-%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text"> 1. GPU 基本架构</span></a></li></ol>
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -232,18 +233,17 @@
     <div class="hr-line"></div>
     
     <div class="e-content article-entry" itemprop="articleBody">
-        <h1 id="1-GPU-基本架构"><a href="#1-GPU-基本架构" class="headerlink" title="1. GPU 基本架构"></a>1. GPU 基本架构</h1><p>GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：</p>
-<p><img src="/images/cuda/01/GPU.png" alt="GPU架构"></p>
-<p>右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，<strong>GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor)</strong> ，使其在架构上对 SIMD 更加友好  [个人理解： SM 是 GPU 对 SIMD 支持的基本单元]，这都是很直觉的内容。 </p>
+        <h1 id="1-gpu-基本架构"><a class="markdownIt-Anchor" href="#1-gpu-基本架构"></a> 1. GPU 基本架构</h1>
+<p>GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：</p>
+<p><img src="/images/cuda/01/GPU.png" alt="GPU架构" /></p>
+<p>右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，<strong>GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor)</strong> ，使其在架构上对 SIMD 更加友好  [个人理解： SM 是 GPU 对 SIMD 支持的基本单元]，这都是很直觉的内容。</p>
 <p>我们学习的 CUDA Runtime API 相对 CUDA Driver 更高层一些，CUDA 部分由 NVCC 编译器负责编译，所谓核函数，就是 CUDA Device 上运行的代码。</p>
-<p><img src="/images/cuda/01/CUDARuntime.png" alt="CUDA Runtime API"></p>
+<p><img src="/images/cuda/01/CUDARuntime.png" alt="CUDA Runtime API" /></p>
 <p><code>__global__</code> 说明符会被 NVCC 编译器识别区分为核函数 (Kernel)，为了实现从主机端向设备端发起核函数调用，CUDA C++ 扩展了标准语法，引入了执行配置（Execution Configuration）。该机制通过三尖括号 <code>&lt;&lt;&lt;A, B&gt;&gt;&gt;</code> 设定，其中 A 是 block nums, B 代表 thread nums，即：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> func&lt;&lt;&lt;num_of_blocks, num_of_threads&gt;&gt;&gt;()</span><br></pre></td></tr></table></figure>
-
 <p>那么总共分配的线程就是：num_blocks x num_threads 个</p>
 <p>说了这么多，来手写一个 CUDA Hello World 吧</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fmt/format.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">helloFromGPU</span><span class="params">()</span> </span>&#123;    </span><br><span class="line">		<span class="type">int</span> threadId = threadIdx.x;    </span><br><span class="line">		<span class="type">int</span> blockId = blockIdx.x;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello from GPU, thread ID: %d, block ID: %d\n&quot;</span>, threadId, blockId);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;    </span><br><span class="line">		std::cout &lt;&lt; fmt::format(<span class="string">&quot;主机启动：准备 GPU 调度, \n&quot;</span>);</span><br><span class="line">    helloFromGPU&lt;&lt;&lt;<span class="number">2</span>, <span class="number">4</span>&gt;&gt;&gt;();</span><br><span class="line">    <span class="keyword">auto</span> err = <span class="built_in">cudaDeviceSynchronize</span>(); <span class="comment">// wait for GPU finish    </span></span><br><span class="line">    <span class="keyword">if</span> (cudaError_t::cudaSuccess != err) &#123;        </span><br><span class="line">		    std::cerr &lt;&lt; fmt::format(<span class="string">&quot;CUDA 错误: &#123;&#125;\n&quot;</span>, <span class="built_in">cudaGetErrorString</span>(err));        </span><br><span class="line">		    <span class="keyword">return</span> <span class="number">1</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    std::cout &lt;&lt; fmt::format(<span class="string">&quot;主机完成：GPU 调度完成, \n&quot;</span>);        </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>注意，显然我们这是异构计算，GPU 的计算是异步的，所以需要显示的调用 <code>cudaDeviceSynchronize</code> 来等待 GPU 调用完成，不然 CPU 的程序会直接结束，详情可参考 <a target="_blank" rel="noopener" href="https://developer.download.nvidia.com/compute/DevZone/docs/html/C/doc/html/group__CUDART__DEVICE_gb76422145b5425829597ebd1003303fe.html">api官方说明</a></p>
 <p>输出结果：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">主机启动：准备 GPU 调度, </span><br><span class="line">Hello from GPU, thread ID: 0, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 1, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 2, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 3, block ID: 0</span><br><span class="line">Hello from GPU, thread ID: 0, block ID: 1</span><br><span class="line">Hello from GPU, thread ID: 1, block ID: 1</span><br><span class="line">Hello from GPU, thread ID: 2, block ID: 1</span><br><span class="line">Hello from GPU, thread ID: 3, block ID: 1</span><br><span class="line">主机完成：GPU 调度完成, </span><br></pre></td></tr></table></figure>
@@ -321,7 +321,7 @@
   <div class="sidebar-wrap">
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-GPU-%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">1. GPU 基本架构</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-gpu-%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text"> 1. GPU 基本架构</span></a></li></ol>
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -447,7 +447,7 @@
           url: "http://kyonqi.github.io/2026/02/28/cuda/01/",
           excerpt: "",
           description: "",
-          stripContent: "1. GPU 基本架构GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在架构上对 SIMD 更加友好  [个人理解： SM 是 GPU 对 SIMD 支持的基本单元]，这都是很",
+          stripContent: " 1. GPU 基本架构 GPU 可以类比 CPU 架构理解，只不过弱化控制器，强化计算能力 (SP)，如下图：  右图 GPU 中，绿色方块为 SP (streaming processor) 是 GPU 运算的基本单元 (其实就类似 ALU)，GPU 中天然的将多个 SP 组合在一起，配合一定数量的寄存器和共享内存，形成一个 SM (streaming multiprocessor) ，使其在架构上对 SIMD 更加友好  [个人理解： SM 是 GPU 对 SIMD 支持的基本单元]，这都",
           date: "Sat Feb 28 2026 03:25:00 GMT+0100",
           updated: "Thu Mar 05 2026 19:37:28 GMT+0100",
           cover: "/images/banner.webp",
@@ -513,7 +513,13 @@
   }
 </script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.js" integrity="sha384-MWNUH0WmtsYGhn2cbH6ELRCbf9LG3QDqCC+gqPB3IBNO35xjZK3Ejb6oONRpDbPg" crossorigin="anonymous" defer data-pjax></script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" defer onload="renderMathInElement(_$(&#39;article&#39;), {delimiters: [{left: &#39;$$&#39;, right: &#39;$$&#39;, display: true},{left: &#39;$&#39;, right: &#39;$&#39;, display: false}]});" data-pjax></script>
+
+  
 
 
   </body>

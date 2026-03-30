@@ -17,12 +17,12 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。 分层概览 我们将整个 nano-vllm 大致分为下面五层：  用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使用的示">
+    <meta name="description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。  分层概览  我们将整个 nano-vllm 大致分为下面五层：   用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】01 - 框架整体概览">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/05/nano-vllm/01/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。 分层概览 我们将整个 nano-vllm 大致分为下面五层：  用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使用的示">
+<meta property="og:description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。  分层概览  我们将整个 nano-vllm 大致分为下面五层：   用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_1.svg">
 <meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_2.svg">
@@ -44,6 +44,7 @@
 <link rel="stylesheet" href="/css/style.css">
 
   <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+      <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.css" integrity="sha384-tTgKLjMYmJr94v8qu2PE5MUGSMbyN2xiH266JUB3gpm8vnnJywd1dWSOEfrFz+YI" crossorigin="anonymous">
     
 <script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
 
@@ -154,7 +155,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text">分层概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">整体架构</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text"> 分层概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text"> 整体架构</span></a></li></ol>
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -239,43 +240,56 @@
 <p><em>立志写出纯夏都能看懂的 nano-vllm 学习。</em></p>
 </blockquote>
 <p>在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。</p>
-<h2 id="分层概览"><a href="#分层概览" class="headerlink" title="分层概览"></a>分层概览</h2><hr>
+<h2 id="分层概览"><a class="markdownIt-Anchor" href="#分层概览"></a> 分层概览</h2>
+<hr />
 <p>我们将整个 nano-vllm 大致分为下面五层：</p>
 <ul>
-<li><p><strong>用户接口层</strong>：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；</p>
+<li>
+<p><strong>用户接口层</strong>：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；</p>
 <ul>
 <li><code>example.py</code> ：接口使用的示例；</li>
 <li><code>llm.py</code> ：对引擎调度器的简单封装；</li>
 <li><code>sampling_params.py</code>  ：控制采样行为（temperature、max_tokens）；</li>
 <li><code>config.py</code> ：管理全局配置（block 大小、显存利用率、最大序列长度等）。</li>
 </ul>
-<p>  <img src="/images/nano-vllm/01/nano_vllm_layer_1.svg" alt="nano_vllm_layer_1.svg"><br>  <center>用户接口层</center><br>  <br></p>
+<p><img src="/images/nano-vllm/01/nano_vllm_layer_1.svg" alt="nano_vllm_layer_1.svg" /></p>
+  <center>用户接口层</center>
+  <br>
 </li>
-<li><p><strong>引擎调度层</strong>：框架的调度器， <code>LLMEngine</code> 在循环中使用 <code>step()</code> 驱动整个主循环，每一步由 <code>Scheduler</code> 决定当前该做 prefill（处理新请求）还是 decode（续写已有序列）。<code>BlockManager</code> 以 PagedAttention 的方式管理 KV cache 显存 —— 将其切分为固定大小的 block 按需分配和回收，同时通过 block 级 hash 实现 Prefix Caching。当显存不足时，<code>Scheduler</code> 会抢占低优先级的序列，释放其 block 后放回等待队列。</p>
+<li>
+<p><strong>引擎调度层</strong>：框架的调度器， <code>LLMEngine</code> 在循环中使用 <code>step()</code> 驱动整个主循环，每一步由 <code>Scheduler</code> 决定当前该做 prefill（处理新请求）还是 decode（续写已有序列）。<code>BlockManager</code> 以 PagedAttention 的方式管理 KV cache 显存 —— 将其切分为固定大小的 block 按需分配和回收，同时通过 block 级 hash 实现 Prefix Caching。当显存不足时，<code>Scheduler</code> 会抢占低优先级的序列，释放其 block 后放回等待队列。</p>
 <ul>
 <li><code>llm_engine.py</code> ：引擎主体，实现 <code>generate()</code> 和 <code>step()</code> 主循环，负责初始化 <code>ModelRunner</code>、<code>Scheduler</code> 和 <code>Tokenizer</code>，并协调多进程 Tensor Parallel 的启动与退出；</li>
-<li><code>scheduler.py</code> ：调度器，管理 waiting&#x2F;running 两个队列，<code>schedule()</code> 优先做 prefill、无新请求时做 decode，<code>preempt()</code> 在显存不足时抢占序列，<code>postprocess()</code> 追加新 token 并判断是否结束（EOS&#x2F;max_tokens）；</li>
-<li><code>block_manager.py</code> ：KV cache 的分页内存管理器，维护 block 的分配&#x2F;释放&#x2F;引用计数，<code>allocate()</code> 时通过 xxhash 对 full block 做哈希匹配实现 Prefix Caching，<code>can_append()</code>&#x2F;<code>may_append()</code> 处理 decode 阶段的 block 扩展；</li>
+<li><code>scheduler.py</code> ：调度器，管理 waiting/running 两个队列，<code>schedule()</code> 优先做 prefill、无新请求时做 decode，<code>preempt()</code> 在显存不足时抢占序列，<code>postprocess()</code> 追加新 token 并判断是否结束（EOS/max_tokens）；</li>
+<li><code>block_manager.py</code> ：KV cache 的分页内存管理器，维护 block 的分配/释放/引用计数，<code>allocate()</code> 时通过 xxhash 对 full block 做哈希匹配实现 Prefix Caching，<code>can_append()</code>/<code>may_append()</code> 处理 decode 阶段的 block 扩展；</li>
 <li><code>sequence.py</code> ：单条请求的数据结构，封装 token_ids、block_table、状态机（WAITING → RUNNING → FINISHED）。</li>
 </ul>
-<p>  <img src="/images/nano-vllm/01/nano_vllm_layer_2.svg" alt="nano_vllm_layer_2.svg"><br>  <center>引擎调度层</center><br>  <br></p>
+<p><img src="/images/nano-vllm/01/nano_vllm_layer_2.svg" alt="nano_vllm_layer_2.svg" /></p>
+  <center>引擎调度层</center>
+  <br>
 </li>
-<li><p><strong>模型执行层</strong>：负责将调度层输出的 <code>Sequence</code> 列表转化为 GPU 上的实际计算。<code>ModelRunner</code> 根据 prefill&#x2F;decode 阶段分别组装不同形状的 input_ids、positions、slot_mapping 等 tensor，调用模型前向传播获得 logits，再由 <code>Sampler</code> 采样出 token。</p>
+<li>
+<p><strong>模型执行层</strong>：负责将调度层输出的 <code>Sequence</code> 列表转化为 GPU 上的实际计算。<code>ModelRunner</code> 根据 prefill/decode 阶段分别组装不同形状的 input_ids、positions、slot_mapping 等 tensor，调用模型前向传播获得 logits，再由 <code>Sampler</code> 采样出 token。</p>
 <ul>
 <li><code>model_runner.py</code> ：模型执行器，核心文件；</li>
 <li><code>loader.py</code> ：模型权重加载器，从 safetensors 文件中读取权重；</li>
 <li><code>sampler.py</code> ：采样器，实现带温度的随机采样。</li>
 </ul>
-<p>  <img src="/images/nano-vllm/01/nano_vllm_layer_3.svg" alt="nano_vllm_layer_3.svg"><br>  <center>模型执行层</center><br>  <br></p>
+<p><img src="/images/nano-vllm/01/nano_vllm_layer_3.svg" alt="nano_vllm_layer_3.svg" /></p>
+  <center>模型执行层</center>
+  <br>
 </li>
-<li><p><strong>模型结构层</strong>：Transformer Decoder 实现；</p>
+<li>
+<p><strong>模型结构层</strong>：Transformer Decoder 实现；</p>
 <ul>
 <li><code>qwen3.py</code> ：Qwen3 模型定义。</li>
 </ul>
-<p>  <img src="/images/nano-vllm/01/nano_vllm_layer_4.svg" alt="nano_vllm_layer4.svg"><br>  <center>模型结构层</center><br>  <br>
-  </p>
+<p><img src="/images/nano-vllm/01/nano_vllm_layer_4.svg" alt="nano_vllm_layer4.svg" /></p>
+  <center>模型结构层</center>
+  <br>
 </li>
-<li><p><strong>基础算子层</strong>：模型对应的算子实现；</p>
+<li>
+<p><strong>基础算子层</strong>：模型对应的算子实现；</p>
 <ul>
 <li><code>attention.py</code> ：attention 计算与 KV cache 存取；</li>
 <li><code>rotary_embedding.py</code> ：RoPE 旋转位置编码；</li>
@@ -284,12 +298,15 @@
 <li><code>activation.py</code> ：激活函数实现；</li>
 <li><code>embed_head.py</code> ：词表并行的 Embedding 和 LM Head。</li>
 </ul>
-<p>  <img src="/images/nano-vllm/01/nano_vllm_layer_5.svg" alt="nano_vllm_layer_5.svg"><br>  <center>基础算子层</center><br>  <br></p>
+<p><img src="/images/nano-vllm/01/nano_vllm_layer_5.svg" alt="nano_vllm_layer_5.svg" /></p>
+  <center>基础算子层</center>
+  <br>
 </li>
 </ul>
-<h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><hr>
+<h2 id="整体架构"><a class="markdownIt-Anchor" href="#整体架构"></a> 整体架构</h2>
+<hr />
 <p>整体来看，结构如下图：</p>
-<p><img src="/images/nano-vllm/01/nano-vllm-architecture-Nano-vLLM.svg" alt="nano-vllm-architecture-Nano-vLLM 架构全景.svg"></p>
+<p><img src="/images/nano-vllm/01/nano-vllm-architecture-Nano-vLLM.svg" alt="nano-vllm-architecture-Nano-vLLM 架构全景.svg" /></p>
 <center>整体架构</center>
     </div>
     <footer class="article-footer">
@@ -365,7 +382,7 @@
   <div class="sidebar-wrap">
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text">分层概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">整体架构</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text"> 分层概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text"> 整体架构</span></a></li></ol>
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -491,7 +508,7 @@
           url: "http://kyonqi.github.io/2026/03/05/nano-vllm/01/",
           excerpt: "",
           description: "",
-          stripContent: " 立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。 分层概览 我们将整个 nano-vllm 大致分为下面五层：  用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使用的示例； llm.py ：对引擎调度器的简单封装； sampling_params.py  ：控制采样行",
+          stripContent: " 立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。  分层概览  我们将整个 nano-vllm 大致分为下面五层：   用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使用的示例； llm.py ：对引擎调度器的简单封装； sampling_params.py  ：控制",
           date: "Thu Mar 05 2026 19:30:00 GMT+0100",
           updated: "Thu Mar 05 2026 19:45:34 GMT+0100",
           cover: "/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F.png#%20%E5%BF%85%E9%80%89",
@@ -557,7 +574,13 @@
   }
 </script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.js" integrity="sha384-MWNUH0WmtsYGhn2cbH6ELRCbf9LG3QDqCC+gqPB3IBNO35xjZK3Ejb6oONRpDbPg" crossorigin="anonymous" defer data-pjax></script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" defer onload="renderMathInElement(_$(&#39;article&#39;), {delimiters: [{left: &#39;$$&#39;, right: &#39;$$&#39;, display: true},{left: &#39;$&#39;, right: &#39;$&#39;, display: false}]});" data-pjax></script>
+
+  
 
 
   </body>

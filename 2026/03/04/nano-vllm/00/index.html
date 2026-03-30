@@ -17,14 +17,14 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git  先把代码 git c">
+    <meta name="description" content="立志写出纯夏都能看懂的 nano-vllm 学习。   0. 环境配置 本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。  uv 配置搭建环境  1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git 先把代码 gi">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】00 - 基础环境配置">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/04/nano-vllm/00/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git  先把代码 git c">
+<meta property="og:description" content="立志写出纯夏都能看懂的 nano-vllm 学习。   0. 环境配置 本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。  uv 配置搭建环境  1git clone git@github.com:GeeeekExplorer&#x2F;nano-vllm.git 先把代码 gi">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg">
+<meta property="og:image" content="http://kyonqi.github.io/2026/03/04/nano-vllm/00/images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg">
 <meta property="article:published_time" content="2026-03-04T12:25:00.000Z">
 <meta property="article:modified_time" content="2026-03-05T18:36:59.731Z">
 <meta property="article:author" content="KyonQi">
@@ -32,13 +32,14 @@
 <meta property="article:tag" content="nano-vllm">
 <meta property="article:tag" content="vLLM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg">
+<meta name="twitter:image" content="http://kyonqi.github.io/2026/03/04/nano-vllm/00/images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
 <link rel="stylesheet" href="/css/style.css">
 
   <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+      <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.css" integrity="sha384-tTgKLjMYmJr94v8qu2PE5MUGSMbyN2xiH266JUB3gpm8vnnJywd1dWSOEfrFz+YI" crossorigin="anonymous">
     
 <script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
 
@@ -149,7 +150,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">0. 环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#uv-%E9%85%8D%E7%BD%AE%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-number">1.1.</span> <span class="toc-text">uv 配置搭建环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="toc-number">1.2.</span> <span class="toc-text">简单测试</span></a></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text"> 0. 环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#uv-%E9%85%8D%E7%BD%AE%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-number">1.1.</span> <span class="toc-text"> uv 配置搭建环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="toc-number">1.2.</span> <span class="toc-text"> 简单测试</span></a></li></ol></li></ol>
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -233,37 +234,32 @@
         <blockquote>
 <p><em>立志写出纯夏都能看懂的 nano-vllm 学习。</em></p>
 </blockquote>
-<h1 id="0-环境配置"><a href="#0-环境配置" class="headerlink" title="0. 环境配置"></a>0. 环境配置</h1><p>本篇作为 <code>nano-vllm</code> 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。</p>
+<h1 id="0-环境配置"><a class="markdownIt-Anchor" href="#0-环境配置"></a> 0. 环境配置</h1>
+<p>本篇作为 <code>nano-vllm</code> 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。</p>
 <p>我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。</p>
-<h2 id="uv-配置搭建环境"><a href="#uv-配置搭建环境" class="headerlink" title="uv 配置搭建环境"></a>uv 配置搭建环境</h2><hr>
+<h2 id="uv-配置搭建环境"><a class="markdownIt-Anchor" href="#uv-配置搭建环境"></a> uv 配置搭建环境</h2>
+<hr />
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:GeeeekExplorer/nano-vllm.git</span><br></pre></td></tr></table></figure>
-
 <p>先把代码 git clone 下来，uv 创建虚拟环境</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uv venv --python 3.10</span><br></pre></td></tr></table></figure>
-
 <p>然后先不要着急 <code>uv sync</code> ，注意下 <code>pyproject.toml</code> 文件，里面依赖了 <code>flash-attn</code> ，建议各位决定并安装好自己的 <code>torch + cuda</code> 版本后，去这个 <a target="_blank" rel="noopener" href="https://github.com/mjun0812/flash-attention-prebuild-wheels">prebuild wheels</a> 里找到对应下载你想要的版本，然后自行安装，不然版本报错挺烦人的。</p>
 <p>比如，我这里打算用 <code>torch 2.10 + cuda 12.8</code>，那么，先把 toml 中 <code>flash-attn</code> 注释掉，并在文件末尾加入相关的依赖，最终文件如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">[build-system]</span><br><span class="line">requires = [<span class="string">&quot;setuptools&gt;=61&quot;</span>]</span><br><span class="line">build-backend = <span class="string">&quot;setuptools.build_meta&quot;</span></span><br><span class="line"></span><br><span class="line">[project]</span><br><span class="line">name = <span class="string">&quot;nano-vllm&quot;</span></span><br><span class="line">version = <span class="string">&quot;0.2.0&quot;</span></span><br><span class="line">authors = [&#123; name = <span class="string">&quot;Xingkai Yu&quot;</span> &#125;]</span><br><span class="line">license = <span class="string">&quot;MIT&quot;</span></span><br><span class="line">license-files = [<span class="string">&quot;LICENSE&quot;</span>]</span><br><span class="line">readme = <span class="string">&quot;README.md&quot;</span></span><br><span class="line">description = <span class="string">&quot;a lightweight vLLM implementation built from scratch&quot;</span></span><br><span class="line">requires-python = <span class="string">&quot;&gt;=3.10,&lt;3.13&quot;</span></span><br><span class="line">dependencies = [</span><br><span class="line">    <span class="string">&quot;torch&gt;=2.4.0&quot;</span>,</span><br><span class="line">    <span class="string">&quot;triton&gt;=3.0.0&quot;</span>,</span><br><span class="line">    <span class="string">&quot;transformers&gt;=4.51.0&quot;</span>,</span><br><span class="line">    <span class="comment"># &quot;flash-attn&quot;, use pre-built flash-attn</span></span><br><span class="line">    <span class="string">&quot;xxhash&quot;</span>,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">[project.urls]</span><br><span class="line">Homepage=<span class="string">&quot;https://github.com/GeeeekExplorer/nano-vllm&quot;</span></span><br><span class="line"></span><br><span class="line">[tool.setuptools.packages.find]</span><br><span class="line"><span class="built_in">where</span> = [<span class="string">&quot;.&quot;</span>]</span><br><span class="line">include = [<span class="string">&quot;nanovllm*&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面是新加入的对应 torch 2.10 + cu128 的索引</span></span><br><span class="line">[tool.uv.sources]</span><br><span class="line">torch = &#123; index = <span class="string">&quot;pytorch-cu128&quot;</span> &#125;</span><br><span class="line"></span><br><span class="line">[[tool.uv.index]]</span><br><span class="line">name = <span class="string">&quot;pytorch-cu128&quot;</span></span><br><span class="line">url = <span class="string">&quot;https://download.pytorch.org/whl/cu128&quot;</span></span><br><span class="line">explicit = <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
 <p>然后，<code>uv sync</code> 安装依赖，再在上面 <strong>prebuild wheels</strong> 中找到对应的 <code>flash-attn</code> 版本，这里是我们使用的是 2.8.3：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uv pip install https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.7.16/flash_attn-2.8.3+cu128torch2.10-cp310-cp310-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-
 <p>如此一来，整个环境就搭建完成了，接下来我们使用 <code>Qwen3-0.6B</code> 做一个简单的测试，权重下载方法：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">uv pip install huggingface_hub</span><br><span class="line"><span class="comment"># 执行下面命令前激活 uv 的虚拟环境，local-dir 修改成你自己想放的位置</span></span><br><span class="line">hf download Qwen/Qwen3-0.6B --local-dir ~/Project/vllm/huggingface/Qwen3-0.6B/</span><br></pre></td></tr></table></figure>
-
-<h2 id="简单测试"><a href="#简单测试" class="headerlink" title="简单测试"></a>简单测试</h2><hr>
+<h2 id="简单测试"><a class="markdownIt-Anchor" href="#简单测试"></a> 简单测试</h2>
+<hr />
 <p>打开 <code>example.py</code> ，把 <code>path</code> 修改成上面你下载的路径，</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">	path = os.path.expanduser(<span class="string">&quot;~/Project/vllm/huggingface/Qwen3-0.6B/&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p><em><del>然后，<code>python main.py</code> 就可以了。</del></em></p>
+<p><em><s>然后，<code>python main.py</code> 就可以了。</s></em></p>
 <p>还没那么简单，哈哈，由于 <code>transformers</code> 库 api 更新的原因，如果你直接 <code>python example.py</code>  是会看到下面报错的：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[rank0]:   File <span class="string">&quot;Project/vllm/nano-vllm/nanovllm/models/qwen3.py&quot;</span>, line 54, <span class="keyword">in</span> __init__</span><br><span class="line">[rank0]:     self.rotary_emb = get_rope(</span><br><span class="line">[rank0]: TypeError: unhashable <span class="built_in">type</span>: <span class="string">&#x27;dict&#x27;</span></span><br></pre></td></tr></table></figure>
-
 <p>想解决很简单，找到 <code>/nanovllm/config.py</code> ，在 <code>AutoConfig</code> 后把 <code>rope_scaling</code> 设置成 <code>None</code> ，即可，具体代码如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoConfig</span><br><span class="line"></span><br><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Config</span>:</span><br><span class="line">		...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__post_init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">assert</span> os.path.isdir(<span class="variable language_">self</span>.model)</span><br><span class="line">        <span class="keyword">assert</span> <span class="variable language_">self</span>.kvcache_block_size % <span class="number">256</span> == <span class="number">0</span></span><br><span class="line">        <span class="keyword">assert</span> <span class="number">1</span> &lt;= <span class="variable language_">self</span>.tensor_parallel_size &lt;= <span class="number">8</span></span><br><span class="line">        <span class="variable language_">self</span>.hf_config = AutoConfig.from_pretrained(<span class="variable language_">self</span>.model)</span><br><span class="line">        <span class="comment"># === 修改点！===</span></span><br><span class="line">        <span class="variable language_">self</span>.hf_config.rope_scaling = <span class="literal">None</span>  <span class="comment"># disable RoPE scaling in HuggingFace config</span></span><br><span class="line">        <span class="variable language_">self</span>.max_model_len = <span class="built_in">min</span>(<span class="variable language_">self</span>.max_model_len, <span class="variable language_">self</span>.hf_config.max_position_embeddings)</span><br><span class="line">        <span class="keyword">assert</span> <span class="variable language_">self</span>.max_num_batched_tokens &gt;= <span class="variable language_">self</span>.max_model_len</span><br></pre></td></tr></table></figure>
-
 <p><em><strong>这下再， <code>python main.p</code>  就真的 Okay 了。</strong></em></p>
-<p><img src="/images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg" alt="纯夏"></p>
+<p><img src="images/nano-vllm/%E7%BA%AF%E5%A4%8F%E5%91%86%E6%AF%9B.jpg" alt="纯夏" /></p>
 <center>我也要学吗？</center>
     </div>
     <footer class="article-footer">
@@ -339,7 +335,7 @@
   <div class="sidebar-wrap">
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">0. 环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#uv-%E9%85%8D%E7%BD%AE%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-number">1.1.</span> <span class="toc-text">uv 配置搭建环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="toc-number">1.2.</span> <span class="toc-text">简单测试</span></a></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text"> 0. 环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#uv-%E9%85%8D%E7%BD%AE%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-number">1.1.</span> <span class="toc-text"> uv 配置搭建环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="toc-number">1.2.</span> <span class="toc-text"> 简单测试</span></a></li></ol></li></ol>
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -465,7 +461,7 @@
           url: "http://kyonqi.github.io/2026/03/04/nano-vllm/00/",
           excerpt: "",
           description: "",
-          stripContent: " 立志写出纯夏都能看懂的 nano-vllm 学习。  0. 环境配置本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。 uv 配置搭建环境 1git clone git@github.com:GeeeekExplorer/nano-vllm.git  先把代码 git clone 下来，uv 创建虚拟环境 1uv venv --python 3.10  然后先不要着急 ",
+          stripContent: " 立志写出纯夏都能看懂的 nano-vllm 学习。   0. 环境配置 本篇作为 nano-vllm 学习讲解第 0 节，首先当然得把代码跑起来，不然纯粹白忙活。 我们选择使用 uv 作为环境搭建，uv 的安装就不多费口舌了，跟随官网文档很快搞定。  uv 配置搭建环境  1git clone git@github.com:GeeeekExplorer/nano-vllm.git 先把代码 git clone 下来，uv 创建虚拟环境 1uv venv --python 3.10 然后先不要着",
           date: "Wed Mar 04 2026 13:25:00 GMT+0100",
           updated: "Thu Mar 05 2026 19:36:59 GMT+0100",
           cover: "/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F.png#%20%E5%BF%85%E9%80%89",
@@ -531,7 +527,13 @@
   }
 </script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.js" integrity="sha384-MWNUH0WmtsYGhn2cbH6ELRCbf9LG3QDqCC+gqPB3IBNO35xjZK3Ejb6oONRpDbPg" crossorigin="anonymous" defer data-pjax></script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" defer onload="renderMathInElement(_$(&#39;article&#39;), {delimiters: [{left: &#39;$$&#39;, right: &#39;$$&#39;, display: true},{left: &#39;$&#39;, right: &#39;$&#39;, display: false}]});" data-pjax></script>
+
+  
 
 
   </body>

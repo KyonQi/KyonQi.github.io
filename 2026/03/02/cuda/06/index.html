@@ -17,14 +17,14 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="6. CUDA 内存管理内存模型 CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：  寄存器 Registers 本地内存 Local Memory 共享内存 Shared Memory 全局内存 Global Memory 常量内存 Constant Memory">
+    <meta name="description" content="6. CUDA 内存管理  内存模型  CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：   寄存器 Registers   本地内存 Local Memory   共享内存 Shared Memory   全局内存 Global Memory   常量内存 Con">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【CUDA学习】06-GPU CUDA 内存管理">
 <meta property="og:url" content="http://kyonqi.github.io/2026/03/02/cuda/06/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="6. CUDA 内存管理内存模型 CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：  寄存器 Registers 本地内存 Local Memory 共享内存 Shared Memory 全局内存 Global Memory 常量内存 Constant Memory">
+<meta property="og:description" content="6. CUDA 内存管理  内存模型  CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：   寄存器 Registers   本地内存 Local Memory   共享内存 Shared Memory   全局内存 Global Memory   常量内存 Con">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/cuda/06/GPU_Archi.png">
+<meta property="og:image" content="http://kyonqi.github.io/2026/03/02/cuda/06/images/cuda/06/GPU_Archi.png">
 <meta property="article:published_time" content="2026-03-02T21:25:00.000Z">
 <meta property="article:modified_time" content="2026-03-05T18:37:41.104Z">
 <meta property="article:author" content="KyonQi">
@@ -32,13 +32,14 @@
 <meta property="article:tag" content="并行计算">
 <meta property="article:tag" content="异构计算">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/cuda/06/GPU_Archi.png">
+<meta name="twitter:image" content="http://kyonqi.github.io/2026/03/02/cuda/06/images/cuda/06/GPU_Archi.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
 <link rel="stylesheet" href="/css/style.css">
 
   <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+      <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.css" integrity="sha384-tTgKLjMYmJr94v8qu2PE5MUGSMbyN2xiH266JUB3gpm8vnnJywd1dWSOEfrFz+YI" crossorigin="anonymous">
     
 <script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
 
@@ -150,7 +151,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#6-CUDA-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">6. CUDA 内存管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">内存模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8-Registers"><span class="toc-number">1.1.1.</span> <span class="toc-text">寄存器 Registers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E5%86%85%E5%AD%98-Local-Memory"><span class="toc-number">1.1.2.</span> <span class="toc-text">本地内存 Local Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98-Shared-Memory"><span class="toc-number">1.1.3.</span> <span class="toc-text">共享内存 Shared Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%86%85%E5%AD%98-Global-Memory"><span class="toc-number">1.1.4.</span> <span class="toc-text">全局内存 Global Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F%E5%86%85%E5%AD%98-Constant-Memory"><span class="toc-number">1.1.5.</span> <span class="toc-text">常量内存 Constant Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%B9%E7%90%86%E5%86%85%E5%AD%98-Texture-Memory"><span class="toc-number">1.1.6.</span> <span class="toc-text">纹理内存 Texture Memory</span></a></li></ol></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#6-cuda-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text"> 6. CUDA 内存管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text"> 内存模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8-registers"><span class="toc-number">1.1.1.</span> <span class="toc-text"> 寄存器 Registers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E5%86%85%E5%AD%98-local-memory"><span class="toc-number">1.1.2.</span> <span class="toc-text"> 本地内存 Local Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98-shared-memory"><span class="toc-number">1.1.3.</span> <span class="toc-text"> 共享内存 Shared Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%86%85%E5%AD%98-global-memory"><span class="toc-number">1.1.4.</span> <span class="toc-text"> 全局内存 Global Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F%E5%86%85%E5%AD%98-constant-memory"><span class="toc-number">1.1.5.</span> <span class="toc-text"> 常量内存 Constant Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%B9%E7%90%86%E5%86%85%E5%AD%98-texture-memory"><span class="toc-number">1.1.6.</span> <span class="toc-text"> 纹理内存 Texture Memory</span></a></li></ol></li></ol></li></ol>
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -231,15 +232,23 @@
     <div class="hr-line"></div>
     
     <div class="e-content article-entry" itemprop="articleBody">
-        <h1 id="6-CUDA-内存管理"><a href="#6-CUDA-内存管理" class="headerlink" title="6. CUDA 内存管理"></a>6. CUDA 内存管理</h1><h2 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h2><hr>
+        <h1 id="6-cuda-内存管理"><a class="markdownIt-Anchor" href="#6-cuda-内存管理"></a> 6. CUDA 内存管理</h1>
+<h2 id="内存模型"><a class="markdownIt-Anchor" href="#内存模型"></a> 内存模型</h2>
+<hr />
 <p>CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：</p>
-<p><img src="/images/cuda/06/GPU_Archi.png" alt="GPU内存架构"></p>
-<h3 id="寄存器-Registers"><a href="#寄存器-Registers" class="headerlink" title="寄存器 Registers"></a>寄存器 Registers</h3><hr>
-<h3 id="本地内存-Local-Memory"><a href="#本地内存-Local-Memory" class="headerlink" title="本地内存 Local Memory"></a>本地内存 Local Memory</h3><hr>
-<h3 id="共享内存-Shared-Memory"><a href="#共享内存-Shared-Memory" class="headerlink" title="共享内存 Shared Memory"></a>共享内存 Shared Memory</h3><hr>
-<h3 id="全局内存-Global-Memory"><a href="#全局内存-Global-Memory" class="headerlink" title="全局内存 Global Memory"></a>全局内存 Global Memory</h3><hr>
-<h3 id="常量内存-Constant-Memory"><a href="#常量内存-Constant-Memory" class="headerlink" title="常量内存 Constant Memory"></a>常量内存 Constant Memory</h3><hr>
-<h3 id="纹理内存-Texture-Memory"><a href="#纹理内存-Texture-Memory" class="headerlink" title="纹理内存 Texture Memory"></a>纹理内存 Texture Memory</h3><hr>
+<p><img src="images/cuda/06/GPU_Archi.png" alt="GPU内存架构" /></p>
+<h3 id="寄存器-registers"><a class="markdownIt-Anchor" href="#寄存器-registers"></a> 寄存器 Registers</h3>
+<hr />
+<h3 id="本地内存-local-memory"><a class="markdownIt-Anchor" href="#本地内存-local-memory"></a> 本地内存 Local Memory</h3>
+<hr />
+<h3 id="共享内存-shared-memory"><a class="markdownIt-Anchor" href="#共享内存-shared-memory"></a> 共享内存 Shared Memory</h3>
+<hr />
+<h3 id="全局内存-global-memory"><a class="markdownIt-Anchor" href="#全局内存-global-memory"></a> 全局内存 Global Memory</h3>
+<hr />
+<h3 id="常量内存-constant-memory"><a class="markdownIt-Anchor" href="#常量内存-constant-memory"></a> 常量内存 Constant Memory</h3>
+<hr />
+<h3 id="纹理内存-texture-memory"><a class="markdownIt-Anchor" href="#纹理内存-texture-memory"></a> 纹理内存 Texture Memory</h3>
+<hr />
 
     </div>
     <footer class="article-footer">
@@ -315,7 +324,7 @@
   <div class="sidebar-wrap">
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#6-CUDA-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">6. CUDA 内存管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">内存模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8-Registers"><span class="toc-number">1.1.1.</span> <span class="toc-text">寄存器 Registers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E5%86%85%E5%AD%98-Local-Memory"><span class="toc-number">1.1.2.</span> <span class="toc-text">本地内存 Local Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98-Shared-Memory"><span class="toc-number">1.1.3.</span> <span class="toc-text">共享内存 Shared Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%86%85%E5%AD%98-Global-Memory"><span class="toc-number">1.1.4.</span> <span class="toc-text">全局内存 Global Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F%E5%86%85%E5%AD%98-Constant-Memory"><span class="toc-number">1.1.5.</span> <span class="toc-text">常量内存 Constant Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%B9%E7%90%86%E5%86%85%E5%AD%98-Texture-Memory"><span class="toc-number">1.1.6.</span> <span class="toc-text">纹理内存 Texture Memory</span></a></li></ol></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#6-cuda-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text"> 6. CUDA 内存管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text"> 内存模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8-registers"><span class="toc-number">1.1.1.</span> <span class="toc-text"> 寄存器 Registers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E5%86%85%E5%AD%98-local-memory"><span class="toc-number">1.1.2.</span> <span class="toc-text"> 本地内存 Local Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98-shared-memory"><span class="toc-number">1.1.3.</span> <span class="toc-text"> 共享内存 Shared Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%86%85%E5%AD%98-global-memory"><span class="toc-number">1.1.4.</span> <span class="toc-text"> 全局内存 Global Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F%E5%86%85%E5%AD%98-constant-memory"><span class="toc-number">1.1.5.</span> <span class="toc-text"> 常量内存 Constant Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%B9%E7%90%86%E5%86%85%E5%AD%98-texture-memory"><span class="toc-number">1.1.6.</span> <span class="toc-text"> 纹理内存 Texture Memory</span></a></li></ol></li></ol></li></ol>
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -441,7 +450,7 @@
           url: "http://kyonqi.github.io/2026/03/02/cuda/06/",
           excerpt: "",
           description: "",
-          stripContent: "6. CUDA 内存管理内存模型 CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：  寄存器 Registers 本地内存 Local Memory 共享内存 Shared Memory 全局内存 Global Memory 常量内存 Constant Memory 纹理内存 Texture Memory ",
+          stripContent: " 6. CUDA 内存管理  内存模型  CPU 的内存结构相比大家都很熟悉了，这里就不费口舌了，我们直接通过下图总体了解 GPU 常见的内存模型 (注意，下面提到的内存模型都是逻辑模型，具体硬件对应我们会在后面继续谈)：   寄存器 Registers   本地内存 Local Memory   共享内存 Shared Memory   全局内存 Global Memory   常量内存 Constant Memory   纹理内存 Texture Memory  ",
           date: "Mon Mar 02 2026 22:25:00 GMT+0100",
           updated: "Thu Mar 05 2026 19:37:41 GMT+0100",
           cover: "/images/banner.webp",
@@ -507,7 +516,13 @@
   }
 </script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.js" integrity="sha384-MWNUH0WmtsYGhn2cbH6ELRCbf9LG3QDqCC+gqPB3IBNO35xjZK3Ejb6oONRpDbPg" crossorigin="anonymous" defer data-pjax></script>
 
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" defer onload="renderMathInElement(_$(&#39;article&#39;), {delimiters: [{left: &#39;$$&#39;, right: &#39;$$&#39;, display: true},{left: &#39;$&#39;, right: &#39;$&#39;, display: false}]});" data-pjax></script>
+
+  
 
 
   </body>
