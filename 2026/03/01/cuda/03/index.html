@@ -533,13 +533,11 @@
         script.setAttribute('crossorigin', 'anonymous');
         script.async = true;
 
-        // issue-term 优先级高于 issue-number
-          script.setAttribute('issue-term', 'title');
-
-        // 可选注入
-          script.setAttribute('input-position', 'top');
-          script.setAttribute('comment-order', 'desc');
-          script.setAttribute('keep-theme', 'true');
+        // 透传其他字段
+            script.setAttribute('issue-term', 'title');
+            script.setAttribute('input-position', 'top');
+            script.setAttribute('comment-order', 'bottom');
+        
 
         // 清空容器（防止重复加载）并插入脚本
         container.innerHTML = '';
