@@ -609,11 +609,17 @@ $$</p><p>可以看到，就是除以了一个 T，</p>
         script.src = 'https://beaudar.lipk.org/client.js';
         script.setAttribute('repo', 'KyonQi/KyonQi.github.io');
         script.setAttribute('branch', 'main');
-        script.setAttribute('issue-term', 'title');
         script.setAttribute('theme', parsedTheme);
-        script.setAttribute('comment-order', 'desc');
         script.setAttribute('crossorigin', 'anonymous');
         script.async = true;
+
+        // issue-term 优先级高于 issue-number
+          script.setAttribute('issue-term', 'title');
+
+        // 可选注入
+          script.setAttribute('input_position', 'top');
+          script.setAttribute('comment_order', 'desc');
+          script.setAttribute('keep_theme', 'true');
 
         // 清空容器（防止重复加载）并插入脚本
         container.innerHTML = '';
