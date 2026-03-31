@@ -9,7 +9,7 @@
   
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
   <title>
-    归档 | KyonQi&#39;s Blog
+    【nano-vllm 学习】番外 - KV Cache 大学习 | KyonQi&#39;s Blog
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="preload" as="style" href="https://fontsapi.zeoseven.com/292/main/result.css" onload="this.rel='stylesheet'" crossorigin>
@@ -18,17 +18,23 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="Hello World!">
-<meta property="og:type" content="website">
-<meta property="og:title" content="KyonQi&#39;s Blog">
-<meta property="og:url" content="http://kyonqi.github.io/archives/page/2/index.html">
+    <meta name="description" content="立志写出让呆呆兽都能看懂的教程讲解   KV-Cache … 是什么？ 在回答这个问题之前，让我们先简单回顾下 transformer 的 decoder 中 attention 的计算 $$Attention(Q,K,V)&#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V $$其中， $Q&#x3D;XW_Q,\quad K&#x3D;XW_K,\quad V+XW">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【nano-vllm 学习】番外 - KV Cache 大学习">
+<meta property="og:url" content="http://kyonqi.github.io/2026/03/14/nano-vllm/%E7%95%AA%E5%A4%96/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="Hello World!">
+<meta property="og:description" content="立志写出让呆呆兽都能看懂的教程讲解   KV-Cache … 是什么？ 在回答这个问题之前，让我们先简单回顾下 transformer 的 decoder 中 attention 的计算 $$Attention(Q,K,V)&#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V $$其中， $Q&#x3D;XW_Q,\quad K&#x3D;XW_K,\quad V+XW">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/banner.webp">
+<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/04/attention.png">
+<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/04/causal_mask.png">
+<meta property="article:published_time" content="2026-03-14T09:30:00.000Z">
+<meta property="article:modified_time" content="2026-03-31T00:12:32.212Z">
 <meta property="article:author" content="KyonQi">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="nano-vllm">
+<meta property="article:tag" content="vLLM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/banner.webp">
+<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/04/attention.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -126,13 +132,12 @@
   </nav>
 </div>
 <header id="header" aria-label="Site header">
-      <picture>
-      </picture>
-        <img  fetchpriority="high" src="/images/banner.webp" alt="">
+    <picture></picture>
+    <img  fetchpriority="high" src="/images/nano-vllm/vllm_%E5%91%86%E5%91%86%E5%85%BD.png" alt="【nano-vllm 学习】番外 - KV Cache 大学习">
   <div id="header-outer">
     <div id="header-title">
           <span id="logo">
-            <h1 data-aos="slide-up">归档</h1>
+            <h1 data-aos="slide-up">【nano-vllm 学习】番外 - KV Cache 大学习</h1>
           </span>
         <h2 id="subtitle-wrap" data-aos="slide-down">
         </h2>
@@ -142,10 +147,15 @@
 
         <div id="content" aria-label="Page content"  class="sidebar-right" >
           <aside id="sidebar" aria-label="Sidebar">
-  <div class="sidebar-wrapper-container ">
+  <div class="sidebar-wrapper-container sticky">
   <div class="sidebar-wrapper">
     <div class="sidebar-wrap" data-aos="fade-up">
-        <div class="sidebar-author">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#kv-cache-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.</span> <span class="toc-text"> KV-Cache … 是什么？</span></a></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
   <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="KyonQi" class="lazyload">
   <div class="sidebar-author-name">KyonQi</div>
   <div class="sidebar-description">Hello World!</div>
@@ -196,7 +206,11 @@
         <div class="sidebar-menu-link">友链</div>
       </div>
 </div>
-
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
     </div>
   </div>
   <div class="sidebar-widget">
@@ -204,118 +218,95 @@
   </div>
 </aside>
 
-          <section id="main" aria-label="Main content"><div class="archives-outer-wrap" data-aos="fade-up">
-    <div class="tag-wrap">
-    <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="/tags/CUDA/">CUDA</a>
-    </div>
-    <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="/tags/%E5%BC%82%E6%9E%84%E8%AE%A1%E7%AE%97/">异构计算</a>
-    </div>
-    <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="/tags/%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97/">并行计算</a>
-    </div>
-    <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="/tags/LLM/">LLM</a>
-    </div>
-    <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="/tags/vLLM/">vLLM</a>
-    </div>
-    <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="/tags/nano-vllm/">nano-vllm</a>
-    </div>
+          <section id="main" aria-label="Main content"><article id="post-nano-vllm/番外" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-03-14T09:30:00.000Z" itemprop="datePublished">2026-03-14</time>
+    <time style="display: none;" id="post-update-time">2026-03-31</time>
+  </span>
 </div>
-<div class="category-wrap">
-    <div class="archives-category-list-item" data-aos="zoom-in">
-      <a class="archives-category-list-link" href="/categories/CUDA/">CUDA</a>
+
     </div>
-    <div class="archives-category-list-item" data-aos="zoom-in">
-      <a class="archives-category-list-link" href="/categories/nano-vLLM/">nano-vLLM</a>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <blockquote>
+<p><em><strong>立志写出让呆呆兽都能看懂的教程讲解</strong></em></p>
+</blockquote>
+<h3 id="kv-cache-是什么"><a class="markdownIt-Anchor" href="#kv-cache-是什么"></a> KV-Cache … 是什么？</h3>
+<p>在回答这个问题之前，让我们先简单回顾下 transformer 的 <strong>decoder 中 attention</strong> 的计算</p>
+<p>$$Attention(Q,K,V)&#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V
+$$</p><p>其中， $Q&#x3D;XW_Q,\quad K&#x3D;XW_K,\quad V+XW_V$，分别是输入序列对权重矩阵的线性投影。</p>
+<p><img src="/images/nano-vllm/04/attention.png" alt="attention.png" /></p>
+<p>如果各位还记得，在 decoder 架构中，我们引入了 <strong>causal mask 因果掩码</strong> 来 “隔断” 未来信息对过去信息的影响。</p>
+<p>换句话说，模型在 token $i$ 处的 attention 输出仅取决于 token $[1, i-1]$ 的输入，而无法获取 $i+1$ 及其之后的位置信息。</p>
+<p>正如下图展示的那样，对于 $t$ 位置的 $QK^T$ 计算，$t + 1$ 及以后的位置都会变成 <em><strong>负无穷$−∞$ ，如此一来这些被 mask 的地方在 softmax 后就会成为 0</strong></em> ：</p>
+<p><img src="/images/nano-vllm/04/causal_mask.png" alt="casual mask.png" /></p>
+<p>现在，让我们继续计算第 $n + 1$ 个 token 的 attention 值，等等，你有没有发现一个<strong>惊人的事实：</strong></p>
+<p>以「我爱你」为例，假设**「你」是我们正在生成的新 token**。此时模型需要计算「你」这一行的 attention——也就是用「你」的 $q_3$ 去和所有位置的 $K$ 做点积，再加权求和 $V$：</p>
+<p>$$h_{你}&#x3D;\text{softmax}( \frac{ q_{你}\cdot \begin{bmatrix}
+k_{我}, k_{爱},k_{你}
+\end{bmatrix}^{T} }{\sqrt{d_k}} ) \begin{bmatrix}
+v_{我} \\
+v_{爱} \\
+v_{你}
+\end{bmatrix}
+$$</p><p>其中，$k_{我}, k_{爱},v_{我},v_{爱}$ 都是之前已经计算过的结果。换言之，当计算新 token 的 attention 时候，会<strong>重复使用上一个 token 计算出来的 K, V 矩阵！</strong></p>
+<p>那么，如果我们能够存储每个 token 计算产生的 K, V 矩阵的话，不就节省了大量重复计算的时间吗！真是机智如我 （当然，代价就是 内存/显存 大量占用）。这其实就是 KV-Cache，很简单吧。</p>
+<p>但你是不是总觉得有什么不对？</p>
+<hr />
+<p>还记得我们前面提到的一个 <strong>大前提</strong> 吗？causal mask 因果掩码？为何非要这个？<em><strong>如果没有这个难道就不能做 KV-Cache 了？</strong></em></p>
+<p>这个问题很有迷惑性，初想似乎可以，但实际上，我们来仔细分析下：</p>
+<p>我们之所以能够缓存历史 token 的 K, V 向量，是因为<strong>在新 token 加入后，这些历史 K, V 向量保持不变。</strong></p>
+<p>我们把 token $i$ 在第 $l$ 层的 K 向量完整写出来：</p>
+<p>$$k_i^{(l)}&#x3D;x_i^{(l)}W_K^{(l)},\quad  x_i^{(l)}&#x3D;f(h_i^{(l-1)})
+, \quad h_i^{(l-1)}&#x3D;\sum_{j\in S_i}
+\alpha_{ij}v_j^{(l-1)}
+$$</p><p>可以看到，整个链路依赖的不变性在与集合 $S_i$ —— 即 token $i$ 在计算 attention 时能够看到哪些位置。</p>
+<p>在有 casual mask 时，$S_i&#x3D;\{ j\leq i\}$，是一个固定的集合，在加入新 token $t_{n+1}$ 后，对于历史位置 $i\leq n$，依然有：</p>
+<p>$$S_i 不变⟹\alpha_{ij}不变⟹h_i不变⟹k_i,v_i不变
+$$</p><p>而如果没有 casual mask，那么$S_i&#x3D;\{1,...,n\}$，依赖整个序列，加入新 token $t_{n+1}$ 后，softmax 归一化会变成：</p>
+<p>$$\alpha_{ij}^{old}&#x3D;\frac{e^{s_{ij}}}{\sum_{k&#x3D;1}^{n}e^{s_{ik}}} ⟹ \alpha_{ij}^{new}&#x3D;\frac{e^{s_{ij}}}{\sum_{k&#x3D;1}^{n+1}e^{s_{ik}}}
+$$</p><p>也即会发生：</p>
+<p>$$S_i 变化⟹\alpha_{ij}变化⟹h_i变化⟹k_i,v_i变化
+$$</p><p>之前缓存的 K, V 向量就彻底失效了，我们不得不对历史 $n$ 个 token 重新计算所有相关向量。</p>
+<aside>
+😤
+<p><em><strong>因此，causal mask 是我们能够使用 KV-Cache 进行加速的关键基础！</strong></em></p>
+</aside>
+
     </div>
-</div>
-        <section class="archives-wrap" data-aos="fade-up">
-          <div class="archive-year-wrap">
-            <a href="/archives/2026" class="archive-year">2026</a>
-          </div>
-          <ul>
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-03-03T09:25:00.000Z" itemprop="datePublished">03-03</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/03/03/cuda/07/">【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考</a>
-</li>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/nano-vLLM/" title="nano-vLLM" data-aos="zoom-in">nano-vLLM</a>
 
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-03-02T21:25:00.000Z" itemprop="datePublished">03-02</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/03/02/cuda/06/">【CUDA学习】06-GPU CUDA 内存管理</a>
-</li>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/LLM/" rel="tag" title="LLM">LLM</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/nano-vllm/" rel="tag" title="nano-vllm">nano-vllm</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/vLLM/" rel="tag" title="vLLM">vLLM</a></li></ul>
 
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-03-02T20:25:00.000Z" itemprop="datePublished">03-02</time>
-    </span>
+    </footer>
   </div>
-    <a class="archive-article-title" href="/2026/03/02/cuda/05/">【CUDA学习】05-GPU 分支分化 &amp; 循环展开</a>
-</li>
-
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-03-02T19:25:00.000Z" itemprop="datePublished">03-02</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/03/02/cuda/04/">【CUDA学习】04-GPU 进一步学习硬件结构</a>
-</li>
-
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-03-01T17:25:00.000Z" itemprop="datePublished">03-01</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/03/01/cuda/03/">【CUDA学习】03-GPU CUDA内部线程索引</a>
-</li>
-
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-03-01T12:25:00.000Z" itemprop="datePublished">03-01</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/03/01/cuda/02/">【CUDA学习】02-GPU 内存结构 &amp; 核函数基本说明</a>
-</li>
-
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-02-28T02:25:00.000Z" itemprop="datePublished">02-28</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/02/28/cuda/01/">【CUDA学习】01-GPU 架构与异构计算</a>
-</li>
-
-            <li class="archive-article">
-  <div class="archive-article-date">
-    <span>
-      <time class="dt-published" datetime="2026-02-28T01:47:24.317Z" itemprop="datePublished">02-28</time>
-    </span>
-  </div>
-    <a class="archive-article-title" href="/2026/02/28/hello-world/">Hello World</a>
-</li>
-
-          </ul>
-        </section>
-  </div>
-  <nav id="page-nav" aria-label="Pagination navigation" data-aos="fade-up">
-    <a class="extend prev" rel="prev" href="/archives/">&laquo; 上一页</a><a class="page-number" href="/archives/">1</a><span class="page-number current">2</span>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+      <div class="article-nav-link-wrap left">
+          <img data-src="/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F_2.png" data-sizes="auto" alt="【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2" class="lazyload">
+        <a href="/2026/03/14/nano-vllm/04/" aria-label="前一篇: 【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2" title="前一篇: 【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2"></a>
+        <div class="article-nav-caption">前一篇</div>
+        <h3 class="article-nav-title">
+            【nano-vllm 学习】04 - 自顶向下的引擎调度层源码学习2
+        </h3>
+      </div>
+    <div class="article-nav-link-wrap right">
+        <img data-src="/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F.png" data-sizes="auto" alt="【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1" class="lazyload">
+      <a href="/2026/03/09/nano-vllm/03/" aria-label="后一篇: 【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1"  title="后一篇: 【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          【nano-vllm 学习】03 - 自顶向下的引擎调度层源码学习1
+      </h3>
+    </div>
   </nav>
+
+</article>
+
 
 </section>
         </div>
@@ -359,7 +350,12 @@
       </div>
       <nav id="mobile-nav" aria-label="Mobile navigation">
   <div class="sidebar-wrap">
-      <div class="sidebar-author">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#kv-cache-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.</span> <span class="toc-text"> KV-Cache … 是什么？</span></a></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
   <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="KyonQi" class="lazyload">
   <div class="sidebar-author-name">KyonQi</div>
   <div class="sidebar-description">Hello World!</div>
@@ -410,8 +406,12 @@
         <div class="sidebar-menu-link">友链</div>
       </div>
 </div>
-
+</div>
   </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
 </nav>
 
     </div>
@@ -469,6 +469,49 @@
 
 <div id="lazy-script">
   <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "KyonQi",
+          title: "【nano-vllm 学习】番外 - KV Cache 大学习",
+          url: "http://kyonqi.github.io/2026/03/14/nano-vllm/%E7%95%AA%E5%A4%96/",
+          excerpt: "",
+          description: "",
+          stripContent: " 立志写出让呆呆兽都能看懂的教程讲解   KV-Cache … 是什么？ 在回答这个问题之前，让我们先简单回顾下 transformer 的 decoder 中 attention 的计算 $$Attention(Q,K,V)&amp;#x3D;softmax(\frac{QK^T}{\sqrt{d_k}})V $$其中， $Q&amp;#x3D;XW_Q,\quad K&amp;#x3D;XW_K,\quad V+XW_V$，分别是输入序列对权重矩阵的线性投影。  如果各位还记得，在 decoder 架构中，我们引入",
+          date: "Sat Mar 14 2026 10:30:00 GMT+0100",
+          updated: "Tue Mar 31 2026 02:12:32 GMT+0200",
+          cover: "/images/nano-vllm/vllm_%E5%91%86%E5%91%86%E5%85%BD.png",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+
   </div>
 </div>
 
