@@ -9,7 +9,7 @@
   
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
   <title>
-    【nano-vllm 学习】01 - 框架整体概览 | KyonQi&#39;s Blog
+    【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1 | KyonQi&#39;s Blog
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="preload" as="style" href="https://fontsapi.zeoseven.com/292/main/result.css" onload="this.rel='stylesheet'" crossorigin>
@@ -18,27 +18,24 @@
     
 <link rel="stylesheet" href="/css/loader.css">
 
-    <meta name="description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。  分层概览  我们将整个 nano-vllm 大致分为下面五层：   用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使">
+    <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。 我们都知道，Attention 计算是这样的： $$\text{Attention}(Q,K,V)&#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【nano-vllm 学习】01 - 框架整体概览">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/05/nano-vllm/01/index.html">
+<meta property="og:title" content="【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1">
+<meta property="og:url" content="http://kyonqi.github.io/2026/04/01/nano-vllm/flashattention/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
-<meta property="og:description" content="立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。  分层概览  我们将整个 nano-vllm 大致分为下面五层：   用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使">
+<meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。 我们都知道，Attention 计算是这样的： $$\text{Attention}(Q,K,V)&#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_1.svg">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_2.svg">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_3.svg">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_4.svg">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_5.svg">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano-vllm-architecture-Nano-vLLM.svg">
-<meta property="article:published_time" content="2026-03-05T18:30:00.000Z">
-<meta property="article:modified_time" content="2026-03-05T18:45:34.190Z">
+<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/safe_softmax.png">
+<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/online_softmax.png">
+<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/flash_attention.png">
+<meta property="article:published_time" content="2026-04-01T08:30:00.000Z">
+<meta property="article:modified_time" content="2026-04-01T20:36:07.834Z">
 <meta property="article:author" content="KyonQi">
 <meta property="article:tag" content="LLM">
 <meta property="article:tag" content="nano-vllm">
 <meta property="article:tag" content="vLLM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/01/nano_vllm_layer_1.svg">
+<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/safe_softmax.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -137,11 +134,11 @@
 </div>
 <header id="header" aria-label="Site header">
     <picture></picture>
-    <img  fetchpriority="high" src="/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F.png" alt="【nano-vllm 学习】01 - 框架整体概览">
+    <img  fetchpriority="high" src="/images/nano-vllm/flash-attention/flash_attention_%E7%88%B1%E9%9F%B3_2.png" alt="【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1">
   <div id="header-outer">
     <div id="header-title">
           <span id="logo">
-            <h1 data-aos="slide-up">【nano-vllm 学习】01 - 框架整体概览</h1>
+            <h1 data-aos="slide-up">【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1</h1>
           </span>
         <h2 id="subtitle-wrap" data-aos="slide-down">
         </h2>
@@ -156,7 +153,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text"> 分层概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text"> 整体架构</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-softmax-%E5%87%BA%E5%8F%91"><span class="toc-number">1.</span> <span class="toc-text"> 从 Softmax 出发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#safe-softmax"><span class="toc-number">1.1.</span> <span class="toc-text"> Safe Softmax</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#online-softmax"><span class="toc-number">1.2.</span> <span class="toc-text"> online softmax</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E5%88%B0-flash-attention-1"><span class="toc-number">2.</span> <span class="toc-text"> 回到 Flash Attention 1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#flash-attention-forward"><span class="toc-number">2.1.</span> <span class="toc-text"> Flash Attention Forward</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flash-attention-backward"><span class="toc-number">3.</span> <span class="toc-text"> Flash Attention Backward</span></a></li></ol>
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -225,13 +222,13 @@
   </div>
 </aside>
 
-          <section id="main" aria-label="Main content"><article id="post-nano-vllm/01" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+          <section id="main" aria-label="Main content"><article id="post-nano-vllm/flashattention" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-inner" data-aos="fade-up">
     <div class="article-meta">
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
-    <time datetime="2026-03-05T18:30:00.000Z" itemprop="datePublished">2026-03-05</time>
-    <time style="display: none;" id="post-update-time">2026-03-05</time>
+    <time datetime="2026-04-01T08:30:00.000Z" itemprop="datePublished">2026-04-01</time>
+    <time style="display: none;" id="post-update-time">2026-04-01</time>
   </span>
 </div>
 
@@ -241,77 +238,123 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
         <blockquote>
-<p><em>立志写出纯夏都能看懂的 nano-vllm 学习。</em></p>
+<p><em><strong>立志写出让纯夏都能看懂的教程讲解</strong></em></p>
 </blockquote>
-<p>在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。</p>
-<h2 id="分层概览"><a class="markdownIt-Anchor" href="#分层概览"></a> 分层概览</h2>
-<hr />
-<p>我们将整个 nano-vllm 大致分为下面五层：</p>
+<p>作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。</p>
+<p>我们都知道，Attention 计算是这样的：</p>
+<p>$$\text{Attention}(Q,K,V)&#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V
+$$</p><p>在标准的 Attention 实现里，我们一般分成下面三步完成：</p>
+<p>$$S&#x3D;QK^T \in \R^{N\times N}
+, \quad P&#x3D;\text{softmax(S)} \in \R^{N\times N}, \quad O&#x3D;PV \in \R^{N\times d}
+
+$$</p><ul>
+<li>从显存 HBM 中加载 $Q, K$，计算 $S&#x3D;QK^T$ ，把 $S$ 写回显存 HBM；</li>
+<li>从显存 HBM 读 $S$ ，计算 $P&#x3D;\text{softmax(S)}$ ，把 $P$ 写回显存 HBM；</li>
+<li>从显存 HBM 按 block 读 $P, V$ ，计算 $O&#x3D;PV$ ，把 $O$ 写回显存 HBM。</li>
+</ul>
+<p>从上面的步骤可以看出来，我们计算一次 Attention 都要从 HBM 中取两次大小是 $N\times N$ 的矩阵 $S,P$ ，由于实际 transformer 里序列长度 $N$ 往往是远大于 hidden size $d$  的，这就导致计算 Attention 时会因为从 HBM 搬运大量数据而浪费时间。换句话说，标准 Attention 的计算在长序列的情况 ( N 远大于 d ) 下会是 IO Bound 的。</p>
+<p>如果有过 CUDA 编程经验的同学看到这一定会有一个直观的想法：<em><strong>如果我们能分块计算 Attention，把庞大的输入按块 $Q_b, K_b$ 从 HBM 取到 SRAM (下标 b 表示 block)，把结果 $O_b$ 按块存回去，这样减少了频繁从最慢的 HBM 中取数据，那不是能加速整个计算？</strong></em></p>
+<p>恭喜你，你离提出 Flash Attention 1 就差一步了。</p>
+<h2 id="从-softmax-出发"><a class="markdownIt-Anchor" href="#从-softmax-出发"></a> 从 Softmax 出发</h2>
+<p>分块计算会有什么难点呢？ 让我们重新审视下标准 Attention 的计算流程：</p>
+<p>$$S&#x3D;QK^T \in \R^{N\times N}
+, \quad P&#x3D;\text{softmax(S)} \in \R^{N\times N}, \quad O&#x3D;PV \in \R^{N\times d}
+
+$$</p><p>emm… $S$ 分块计算就是简单的矩阵分块，$P$ 分块计算的话…</p>
+<p>没错，盲生你发现了华点：对第 $i$ 行而言， softmax 计算里分母是需要我们有整行 N 个 key 的 Score 求和，但分块后，我们每次都只能看到 Block 个 Key 的局部和：</p>
+<p>$$\text{softmax}(s_{ij})&#x3D;\frac{e^{s_{ij}}}{\sum_{k&#x3D;1}^{N}e^{s_{ik}}}
+$$</p><p>好在这个问题也有方法进行解决，那就是 **online softmax。**但在这之前，我们先要了解 safe softmax。</p>
+<h3 id="safe-softmax"><a class="markdownIt-Anchor" href="#safe-softmax"></a> Safe Softmax</h3>
+<p>在实际计算里，如果我们使用 native 的计算方法，我们在指数运算的过程中存在不稳定：数值在指数运算容易溢出等。</p>
+<p>因此，safe softmax 提出对数组 $x[1…n]$ 的每个元素都减去最大值 <strong>max</strong> 后，再进行 softmax 计算，也即：</p>
+<p>$$y_i&#x3D;\frac{e^{x_i-\max\limits_{k&#x3D;1}^N x_k}}{\sum_{k&#x3D;1}^{N}e^{x_j-\max\limits_{k&#x3D;1}^N x_k}}
+$$</p><p>如此一来，我们计算的时候需要：</p>
+<ul>
+<li>遍历数组 $x$ 找到最大值 max；</li>
+<li>遍历数组 $x$ 减去最大值 max 而后指数求和；</li>
+<li>遍历数组 $x$ 按元素计算 softmax。</li>
+</ul>
+<p>总共是 3 次 load，1 次 store，相比 native 多了一次 load 操作。</p>
+<p><img src="/images/nano-vllm/flash-attention/safe_softmax.png" alt="safe softmax.png" /></p>
+<h3 id="online-softmax"><a class="markdownIt-Anchor" href="#online-softmax"></a> online softmax</h3>
+<p>safe 版本之所以多了一次 load，主要是因为其多了遍历找最大值的步骤。那么，如果我们能随着遍历 “动态更新这个 max” 不就能省去找全局最大的遍历了吗。因此，online 的核心在于我们如何使用动态 max 的同时，在数学上还能保证最后结果等价。</p>
+<p>我们直接展示 online 的算法思路：</p>
+<ul>
+<li>遍历数组 $x$ 维护 $m_j$ 记录到索引 $j$ 为止的局部最大值；同时，记录局部指数和 $d_j$；</li>
+<li>遍历数组 $x$ 维护 按元素计算 softmax 值</li>
+</ul>
+<p>可见，我们只需要 2 次 load，1 次 store。</p>
+<p><img src="/images/nano-vllm/flash-attention/online_softmax.png" alt="online softmax.png" /></p>
+<p>online 的核心在于：我们终于可以逐块更新最大值 $max$ 和指数和 $d$，并且最后数值和 native 保持一致。怎么证明呢？</p>
+<p>换句话说，<strong>怎么证明在 online 下，当完成第一次遍历后，我们依然能够有：</strong></p>
+<p>$$m_V&#x3D;\max\limits_{k&#x3D;1}^Vx_k \quad d_V&#x3D;\sum_{j&#x3D;1}^Ve^{x_j-m_V}
+$$</p><p>第一个最大值是显然的，第二个我们用数学归纳就能简单证明：</p>
 <ul>
 <li>
-<p><strong>用户接口层</strong>：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；</p>
-<ul>
-<li><code>example.py</code> ：接口使用的示例；</li>
-<li><code>llm.py</code> ：对引擎调度器的简单封装；</li>
-<li><code>sampling_params.py</code>  ：控制采样行为（temperature、max_tokens）；</li>
-<li><code>config.py</code> ：管理全局配置（block 大小、显存利用率、最大序列长度等）。</li>
-</ul>
-<p><img src="/images/nano-vllm/01/nano_vllm_layer_1.svg" alt="nano_vllm_layer_1.svg" /></p>
-  <center>用户接口层</center>
-  <br>
+<p>当 $V&#x3D;1$ 时，显然，我们有：</p>
+<p>$$d_1&#x3D;e^{x_1-m_1}&#x3D;\sum_{j&#x3D;1}^1e^{x_j-m1}
+$$</p><p>即，上式对 $V&#x3D;1$ 成立。</p>
 </li>
 <li>
-<p><strong>引擎调度层</strong>：框架的调度器， <code>LLMEngine</code> 在循环中使用 <code>step()</code> 驱动整个主循环，每一步由 <code>Scheduler</code> 决定当前该做 prefill（处理新请求）还是 decode（续写已有序列）。<code>BlockManager</code> 以 PagedAttention 的方式管理 KV cache 显存 —— 将其切分为固定大小的 block 按需分配和回收，同时通过 block 级 hash 实现 Prefix Caching。当显存不足时，<code>Scheduler</code> 会抢占低优先级的序列，释放其 block 后放回等待队列。</p>
-<ul>
-<li><code>llm_engine.py</code> ：引擎主体，实现 <code>generate()</code> 和 <code>step()</code> 主循环，负责初始化 <code>ModelRunner</code>、<code>Scheduler</code> 和 <code>Tokenizer</code>，并协调多进程 Tensor Parallel 的启动与退出；</li>
-<li><code>scheduler.py</code> ：调度器，管理 waiting/running 两个队列，<code>schedule()</code> 优先做 prefill、无新请求时做 decode，<code>preempt()</code> 在显存不足时抢占序列，<code>postprocess()</code> 追加新 token 并判断是否结束（EOS/max_tokens）；</li>
-<li><code>block_manager.py</code> ：KV cache 的分页内存管理器，维护 block 的分配/释放/引用计数，<code>allocate()</code> 时通过 xxhash 对 full block 做哈希匹配实现 Prefix Caching，<code>can_append()</code>/<code>may_append()</code> 处理 decode 阶段的 block 扩展；</li>
-<li><code>sequence.py</code> ：单条请求的数据结构，封装 token_ids、block_table、状态机（WAITING → RUNNING → FINISHED）。</li>
-</ul>
-<p><img src="/images/nano-vllm/01/nano_vllm_layer_2.svg" alt="nano_vllm_layer_2.svg" /></p>
-  <center>引擎调度层</center>
-  <br>
-</li>
-<li>
-<p><strong>模型执行层</strong>：负责将调度层输出的 <code>Sequence</code> 列表转化为 GPU 上的实际计算。<code>ModelRunner</code> 根据 prefill/decode 阶段分别组装不同形状的 input_ids、positions、slot_mapping 等 tensor，调用模型前向传播获得 logits，再由 <code>Sampler</code> 采样出 token。</p>
-<ul>
-<li><code>model_runner.py</code> ：模型执行器，核心文件；</li>
-<li><code>loader.py</code> ：模型权重加载器，从 safetensors 文件中读取权重；</li>
-<li><code>sampler.py</code> ：采样器，实现带温度的随机采样。</li>
-</ul>
-<p><img src="/images/nano-vllm/01/nano_vllm_layer_3.svg" alt="nano_vllm_layer_3.svg" /></p>
-  <center>模型执行层</center>
-  <br>
-</li>
-<li>
-<p><strong>模型结构层</strong>：Transformer Decoder 实现；</p>
-<ul>
-<li><code>qwen3.py</code> ：Qwen3 模型定义。</li>
-</ul>
-<p><img src="/images/nano-vllm/01/nano_vllm_layer_4.svg" alt="nano_vllm_layer4.svg" /></p>
-  <center>模型结构层</center>
-  <br>
-</li>
-<li>
-<p><strong>基础算子层</strong>：模型对应的算子实现；</p>
-<ul>
-<li><code>attention.py</code> ：attention 计算与 KV cache 存取；</li>
-<li><code>rotary_embedding.py</code> ：RoPE 旋转位置编码；</li>
-<li><code>linear.py</code> ：FC 实现；</li>
-<li><code>layernorm.py</code> ：RMSNorm 实现；</li>
-<li><code>activation.py</code> ：激活函数实现；</li>
-<li><code>embed_head.py</code> ：词表并行的 Embedding 和 LM Head。</li>
-</ul>
-<p><img src="/images/nano-vllm/01/nano_vllm_layer_5.svg" alt="nano_vllm_layer_5.svg" /></p>
-  <center>基础算子层</center>
-  <br>
+<p>我们 假设 当 $V&#x3D;S-1$ 时，上式成立，即有：</p>
+<p>$$d_{S-1}&#x3D;\sum_{j&#x3D;1}^{S-1}e^{x_j-m_{S-1}}
+$$</p><p>当 $V&#x3D;S$ 时，</p>
+<p>$$\begin{aligned}
+d_S &amp;&#x3D; d_{S-1} \times e^{m_{S-1}-m_S} + e^{x_S-m_S} \\
+&amp;&#x3D; \left( \sum_{j&#x3D;1}^{S-1} e^{x_j-m_{S-1}} \right) \times e^{m_{S-1}-m_S} + e^{x_S-m_S} \\
+&amp;&#x3D; \sum_{j&#x3D;1}^{S-1} e^{x_j-m_S} + e^{x_S-m_S} \\
+&amp;&#x3D; \sum_{j&#x3D;1}^{S} e^{x_j-m_S}
+\end{aligned}
+$$</p><p>可见，上式依然成立，证毕。</p>
 </li>
 </ul>
-<h2 id="整体架构"><a class="markdownIt-Anchor" href="#整体架构"></a> 整体架构</h2>
-<hr />
-<p>整体来看，结构如下图：</p>
-<p><img src="/images/nano-vllm/01/nano-vllm-architecture-Nano-vLLM.svg" alt="nano-vllm-architecture-Nano-vLLM 架构全景.svg" /></p>
-<center>整体架构</center>
+<h2 id="回到-flash-attention-1"><a class="markdownIt-Anchor" href="#回到-flash-attention-1"></a> 回到 Flash Attention 1</h2>
+<p>我们在有了 online softmax 的基础知识后，再回头来看最开始卡住我们的地方：</p>
+<blockquote>
+<p><em><strong>如果我们能分块计算 Attention，把庞大的输入按块 $Q_b, K_b$ 从 HBM 取到 SRAM (下标 b 表示 block)，把结果 $O_b$ 按块存回去，这样减少了频繁从最慢的 HBM 中取数据，那不是能加速整个计算？可是，如何解决 softmax 的分块计算问题呢？</strong></em></p>
+</blockquote>
+<p>现在我们终于可以没有任何后顾之忧的去分块计算 Attention 了。让我们再再再次回顾标准的 Attention 式子：</p>
+<p>$$S&#x3D;QK^T \in \R^{N\times N}
+, \quad P&#x3D;\text{softmax(S)} \in \R^{N\times N}, \quad O&#x3D;PV \in \R^{N\times d}
+
+$$</p><p>我们将 Q, K, V 沿着 序列维度 $N$ 切成大小为 $B$ 的块：</p>
+<p>$$Q&#x3D;\begin{bmatrix}Q_1 \\ Q_2 \\...\\Q_{T_r}\end{bmatrix} (T_r&#x3D;\lceil  N&#x2F;B_r \rceil) \quad 
+K&#x3D;\begin{bmatrix}K_1 \\ K_2 \\...\\K_{T_c}\end{bmatrix} (T_c&#x3D;\lceil  N&#x2F;B_c \rceil) \quad
+V&#x3D;\begin{bmatrix}V_1 \\ V_2 \\...\\V_{T_c}\end{bmatrix}
+
+$$</p><p>其中，$B_r$ 和 $B_c$ 分别是 Q 和 KV 的块大小（具体取值受 SRAM 大小影响）。</p>
+<p>原本 $S, P$ 这些 $N \times N$ 的 Attention 矩阵就被切分成了 $T_r \times T_c$ 个小块，每个小块大小为 $B_r \times B_c$ 。接下来就是对这些 block 做分块的 softmax 计算。</p>
+<h3 id="flash-attention-forward"><a class="markdownIt-Anchor" href="#flash-attention-forward"></a> Flash Attention Forward</h3>
+<p>我们定义：</p>
+<ul>
+<li>输入：$Q, K, V \in \R^{N\times d}$ 存于 HBM</li>
+<li>输出：$O \in \R^{N\times d}$  存于 HBM</li>
+<li>辅助变量：$\ell \in \R^{N}$ 是 行指数和， $m \in \R^{N}$ 行最大值</li>
+</ul>
+<p><strong>Step 0：初始化</strong></p>
+<p>$$O&#x3D;0_{N\times d} \quad \ell&#x3D;0_N \quad m&#x3D;(-\infty)_N
+$$</p><p><strong>Step1：外层遍历 KV 块</strong></p>
+<p>Line 5 从 HBM 中加载分块的 $K_j, V_j$ (  $\R^{B_c\times d}$ ) 到 SRAM</p>
+<p><strong>Step2: 内层遍历 Q 块</strong></p>
+<p>Line 7 从 HBM 中加载分块的 $Q_i ( \R^{B_r\times d} ), O_i, \ell_i, m_i$ 到 SRAM；</p>
+<p>Line 10 有了 Q, K 块以后，我们能够很快计算这个块的局部 attention score，并使用 Online Softmax 的方法来统计局部最大值 $\tilde{m}_{ij}, \tilde{\ell}_{ij}$；</p>
+<p>Line 11 根据局部统计量更新全局最大值：</p>
+<p>$m_i^{\text{new}}&#x3D;\max(m_i, \tilde{m}_{ij})$</p>
+<p>$\ell_i^{\text{new}}&#x3D;\ell_i \cdot e^{m_i-m_i^{\text{new}}} + \tilde{\ell_{ij}}\cdot e^{\tilde{m}_i-m_i^{\text{new}}}$</p>
+<p>这里乘以 $e^{m_{\text{old}} - m_{\text{new}}}$ 的核心原理和我们刚刚推导的 Online Softmax 是一样的，实际上你可以把它简单理解为一个换底变换，<strong>它把所有以旧 max 为基准的 exp 值统一换算到新 max 基准下</strong>。</p>
+<p>Line 12 更新输出块 $O_i$ 。这个式子看起来很复杂，实际上就是和前面我们更新 $\ell$ 思路是一模一样的，旧的 $O_i$ 乘以  $\frac{\ell_i \cdot e^{m_i - m_i^{\text{new}}}}{\ell_i^{\text{new}}}$ 把之前以旧 max 为基准的结果修正为新 max 基准，当前块对应的计算则是  $\frac{ e^{\tilde{m}_i - m_i^{\text{new}}}}{\ell_i^{\text{new}}} \cdot \tilde{P}_{ij} V_j$</p>
+<p>这里这个更新思路建议大伙重新想想 online softmax 换底的思路。</p>
+<p>Line 13 更新全局统计量。</p>
+<p><img src="/images/nano-vllm/flash-attention/flash_attention.png" alt="flash_attention.png" /></p>
+<h2 id="flash-attention-backward"><a class="markdownIt-Anchor" href="#flash-attention-backward"></a> Flash Attention Backward</h2>
+<p>前面我们一直在提 forward 时的优化，Flash Attention 利用分块的思路避免了存储任何中间结果 S, P 到 HBM 中。然而，当模型 backward 更新的时候，还是需要 S, P 的值来计算梯度。</p>
+<p>为了解决这个问题，Flash Attention 采用 recomputation 的思路：</p>
+<ul>
+<li>forward 保存：$O$, $\ell$ (每行的指数和 Softmax 分母), $m$ (每行最大值)；</li>
+<li>backward 计算：从 $Q, K, V$ 和 $\ell, m$ 能够非常轻松简单的分块计算出 $S, P$</li>
+</ul>
+<p>我们从保存 $S, P \in \R^{N\times N}$ 到保存 $\ell, m \in \R^{N}$ 显存需求直接从 $O(N^2)$ 降低到了 $O(N)$。由于 Attention 计算大多时候是 memory-bound 的，因此这个 trade-off 完全可以接受。</p>
+
     </div>
     <footer class="article-footer">
         <a class="article-category-link" href="/categories/nano-vLLM/" title="nano-vLLM" data-aos="zoom-in">nano-vLLM</a>
@@ -321,20 +364,12 @@
     </footer>
   </div>
     <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
-      <div class="article-nav-link-wrap left">
-          <img data-src="/images/nano-vllm/%E5%A4%A7%E5%BC%80%E9%97%A8.jpg#%20%E5%BF%85%E9%80%89" data-sizes="auto" alt="【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习" class="lazyload">
-        <a href="/2026/03/06/nano-vllm/02/" aria-label="前一篇: 【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习" title="前一篇: 【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习"></a>
-        <div class="article-nav-caption">前一篇</div>
-        <h3 class="article-nav-title">
-            【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习
-        </h3>
-      </div>
     <div class="article-nav-link-wrap right">
-        <img data-src="/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F.png#%20%E5%BF%85%E9%80%89" data-sizes="auto" alt="【nano-vllm 学习】00 - 基础环境配置" class="lazyload">
-      <a href="/2026/03/04/nano-vllm/00/" aria-label="后一篇: 【nano-vllm 学习】00 - 基础环境配置"  title="后一篇: 【nano-vllm 学习】00 - 基础环境配置"></a>
+        <img data-src="/images/nano-vllm/%E8%BF%B7%E5%AE%AB%E5%B9%B2%E8%A1%A8%E6%83%851.png" data-sizes="auto" alt="【nano-vllm 学习】06 - 自顶向下的模型结构层" class="lazyload">
+      <a href="/2026/03/29/nano-vllm/06/" aria-label="后一篇: 【nano-vllm 学习】06 - 自顶向下的模型结构层"  title="后一篇: 【nano-vllm 学习】06 - 自顶向下的模型结构层"></a>
       <div class="article-nav-caption">后一篇</div>
       <h3 class="article-nav-title">
-          【nano-vllm 学习】00 - 基础环境配置
+          【nano-vllm 学习】06 - 自顶向下的模型结构层
       </h3>
     </div>
   </nav>
@@ -404,7 +439,7 @@
   <div class="sidebar-wrap">
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text"> 分层概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text"> 整体架构</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-softmax-%E5%87%BA%E5%8F%91"><span class="toc-number">1.</span> <span class="toc-text"> 从 Softmax 出发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#safe-softmax"><span class="toc-number">1.1.</span> <span class="toc-text"> Safe Softmax</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#online-softmax"><span class="toc-number">1.2.</span> <span class="toc-text"> online softmax</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E5%88%B0-flash-attention-1"><span class="toc-number">2.</span> <span class="toc-text"> 回到 Flash Attention 1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#flash-attention-forward"><span class="toc-number">2.1.</span> <span class="toc-text"> Flash Attention Forward</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flash-attention-backward"><span class="toc-number">3.</span> <span class="toc-text"> Flash Attention Backward</span></a></li></ol>
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
@@ -529,14 +564,14 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "KyonQi",
-          title: "【nano-vllm 学习】01 - 框架整体概览",
-          url: "http://kyonqi.github.io/2026/03/05/nano-vllm/01/",
+          title: "【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1",
+          url: "http://kyonqi.github.io/2026/04/01/nano-vllm/flashattention/",
           excerpt: "",
           description: "",
-          stripContent: " 立志写出纯夏都能看懂的 nano-vllm 学习。  在这一章，我们将简单归纳 nano-vllm 的架构，给出一个整体的框架图，使得各位有个基础的概念，后续再逐层输入学习解析。  分层概览  我们将整个 nano-vllm 大致分为下面五层：   用户接口层：这一层用户可以使用 LLM 提供的接口，设置并传入 prompts 和采样参数，获得相应的生成的结果；  example.py ：接口使用的示例； llm.py ：对引擎调度器的简单封装； sampling_params.py  ：控制",
-          date: "Thu Mar 05 2026 19:30:00 GMT+0100",
-          updated: "Thu Mar 05 2026 19:45:34 GMT+0100",
-          cover: "/images/nano-vllm/vllm_%E7%BA%AF%E5%A4%8F.png#%20%E5%BF%85%E9%80%89",
+          stripContent: " 立志写出让纯夏都能看懂的教程讲解  作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。 我们都知道，Attention 计算是这样的： $$\text{Attention}(Q,K,V)&amp;#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V $$在标准的 Attention 实现里，我们一般分成下面三步完成： $$S&amp;#x3D;Q",
+          date: "Wed Apr 01 2026 10:30:00 GMT+0200",
+          updated: "Wed Apr 01 2026 22:36:07 GMT+0200",
+          cover: "/images/nano-vllm/flash-attention/flash_attention_%E7%88%B1%E9%9F%B3_2.png",
         };
       </script>
         
