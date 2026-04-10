@@ -7,7 +7,7 @@
   
   
   
-  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
     【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习 | KyonQi&#39;s Blog
   </title>
@@ -21,14 +21,14 @@
     <meta name="description" content="我们以“自顶向下”的顺序，逐层解析 nano-vllm 的实现细节，这一节将详细解析 用户接口层 的实现细节。  example.py 我们从使用体验出发，先主动思考下，如果是你来做一个推理引擎，当输入 prompts 后，应当发生些什么：  prompts 转为可用的 tokens：首先当然是把 List[String] 结构化并分词后，转化为 token 对应的 List[Ids]； toke">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/06/nano-vllm/02/index.html">
+<meta property="og:url" content="https://kyonqi.github.io/2026/03/06/nano-vllm/02/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="我们以“自顶向下”的顺序，逐层解析 nano-vllm 的实现细节，这一节将详细解析 用户接口层 的实现细节。  example.py 我们从使用体验出发，先主动思考下，如果是你来做一个推理引擎，当输入 prompts 后，应当发生些什么：  prompts 转为可用的 tokens：首先当然是把 List[String] 结构化并分词后，转化为 token 对应的 List[Ids]； toke">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/02/catgirl_prompt.png">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/%E5%A4%A7%E5%BC%80%E9%97%A8.jpg">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/02/chatFormat_Demo.png">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/02/temperature_top_p_effects.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/02/catgirl_prompt.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/%E5%A4%A7%E5%BC%80%E9%97%A8.jpg">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/02/chatFormat_Demo.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/02/temperature_top_p_effects.png">
 <meta property="article:published_time" content="2026-03-06T15:30:00.000Z">
 <meta property="article:modified_time" content="2026-03-06T15:31:44.196Z">
 <meta property="article:author" content="KyonQi">
@@ -36,7 +36,7 @@
 <meta property="article:tag" content="nano-vllm">
 <meta property="article:tag" content="vLLM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/02/catgirl_prompt.png">
+<meta name="twitter:image" content="https://kyonqi.github.io/images/nano-vllm/02/catgirl_prompt.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -566,7 +566,7 @@ $$</p><p>可以看到，就是除以了一个 T，</p>
         window.REIMU_POST = {
           author: "KyonQi",
           title: "【nano-vllm 学习】02 - 自顶向下的用户接口层源码学习",
-          url: "http://kyonqi.github.io/2026/03/06/nano-vllm/02/",
+          url: "https://kyonqi.github.io/2026/03/06/nano-vllm/02/",
           excerpt: "",
           description: "",
           stripContent: "我们以“自顶向下”的顺序，逐层解析 nano-vllm 的实现细节，这一节将详细解析 用户接口层 的实现细节。  example.py 我们从使用体验出发，先主动思考下，如果是你来做一个推理引擎，当输入 prompts 后，应当发生些什么：  prompts 转为可用的 tokens：首先当然是把 List[String] 结构化并分词后，转化为 token 对应的 List[Ids]； tokens 加入引擎调度器的任务队列：既然有了 tokens ，自然是准备开始推理了，做一个任务队列接受所",

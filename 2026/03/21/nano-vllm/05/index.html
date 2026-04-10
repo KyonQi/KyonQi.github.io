@@ -7,7 +7,7 @@
   
   
   
-  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
     【nano-vllm 学习】05 - 自顶向下的模型执行源码学习 | KyonQi&#39;s Blog
   </title>
@@ -21,7 +21,7 @@
     <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  终于来到了 model runner 的学习，在学习了 PageAttention 的基础管理和调度逻辑后，我们终于准备窥见模型推理计算的“真面目”了，ModelRunner 层负责了模型的加载、推理执行和多 GPU 调度，是连接 Scheduler 和底层 CUDA 算子的中间层。 简单来说， 1234Scheduler  →  ModelRunner.ru">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】05 - 自顶向下的模型执行源码学习">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/21/nano-vllm/05/index.html">
+<meta property="og:url" content="https://kyonqi.github.io/2026/03/21/nano-vllm/05/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  终于来到了 model runner 的学习，在学习了 PageAttention 的基础管理和调度逻辑后，我们终于准备窥见模型推理计算的“真面目”了，ModelRunner 层负责了模型的加载、推理执行和多 GPU 调度，是连接 Scheduler 和底层 CUDA 算子的中间层。 简单来说， 1234Scheduler  →  ModelRunner.ru">
 <meta property="og:locale" content="zh_CN">
@@ -560,7 +560,7 @@ $$</p><p>可以看到，就是除以了一个 T，</p>
         window.REIMU_POST = {
           author: "KyonQi",
           title: "【nano-vllm 学习】05 - 自顶向下的模型执行源码学习",
-          url: "http://kyonqi.github.io/2026/03/21/nano-vllm/05/",
+          url: "https://kyonqi.github.io/2026/03/21/nano-vllm/05/",
           excerpt: "",
           description: "",
           stripContent: " 立志写出让纯夏都能看懂的教程讲解  终于来到了 model runner 的学习，在学习了 PageAttention 的基础管理和调度逻辑后，我们终于准备窥见模型推理计算的“真面目”了，ModelRunner 层负责了模型的加载、推理执行和多 GPU 调度，是连接 Scheduler 和底层 CUDA 算子的中间层。 简单来说， 1234Scheduler  →  ModelRunner.run(seqs, is_prefill)  →  Model  →  Sampler  →  toke",

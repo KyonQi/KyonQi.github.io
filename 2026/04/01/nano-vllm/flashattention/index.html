@@ -7,7 +7,7 @@
   
   
   
-  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
     【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1 | KyonQi&#39;s Blog
   </title>
@@ -21,13 +21,13 @@
     <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。 我们都知道，Attention 计算是这样的： $$\text{Attention}(Q,K,V)&#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1">
-<meta property="og:url" content="http://kyonqi.github.io/2026/04/01/nano-vllm/flashattention/index.html">
+<meta property="og:url" content="https://kyonqi.github.io/2026/04/01/nano-vllm/flashattention/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。 我们都知道，Attention 计算是这样的： $$\text{Attention}(Q,K,V)&#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/safe_softmax.png">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/online_softmax.png">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/flash_attention.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/flash-attention/safe_softmax.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/flash-attention/online_softmax.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/flash-attention/flash_attention.png">
 <meta property="article:published_time" content="2026-04-01T08:30:00.000Z">
 <meta property="article:modified_time" content="2026-04-01T20:36:07.834Z">
 <meta property="article:author" content="KyonQi">
@@ -35,7 +35,7 @@
 <meta property="article:tag" content="nano-vllm">
 <meta property="article:tag" content="vLLM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/flash-attention/safe_softmax.png">
+<meta name="twitter:image" content="https://kyonqi.github.io/images/nano-vllm/flash-attention/safe_softmax.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -592,7 +592,7 @@ $$</p><p><strong>Step1：外层遍历 KV 块</strong></p>
         window.REIMU_POST = {
           author: "KyonQi",
           title: "【就当是为了速度，对它使用分块吧】一文带你看懂 Flash Attention 1",
-          url: "http://kyonqi.github.io/2026/04/01/nano-vllm/flashattention/",
+          url: "https://kyonqi.github.io/2026/04/01/nano-vllm/flashattention/",
           excerpt: "",
           description: "",
           stripContent: " 立志写出让纯夏都能看懂的教程讲解  作为 LLM 加速的核心，基本每次都要编译 FlashAttention 库来实现计算加速，足见其应用之广泛，因此专门出一章来学习 Flash Attention 第一版的实现。 我们都知道，Attention 计算是这样的： $$\text{Attention}(Q,K,V)&amp;#x3D;\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V $$在标准的 Attention 实现里，我们一般分成下面三步完成： $$S&amp;#x3D;Q",

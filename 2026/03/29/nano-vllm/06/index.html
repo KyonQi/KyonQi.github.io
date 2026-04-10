@@ -7,7 +7,7 @@
   
   
   
-  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
     【nano-vllm 学习】06 - 自顶向下的模型结构层 | KyonQi&#39;s Blog
   </title>
@@ -21,12 +21,12 @@
     <meta name="description" content="立志写出让纯夏都能看懂的教程讲解  我们继续自顶向下学习 nano-vllm 的架构，本章我们主要解析其自带支持的 qwen3-8b 的模型结构。本章我们主要解析其自带支持的 qwen3-8b 的模型结构。我们将首先介绍 qwen3 的模型结构，然后从代码入手快速学习了解整个前向推理过程，至于具体的基础算子实现我们放在后面再讲。  模型架构 先简单对 Qwen3 模型有个概念，整体其实很好理解，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【nano-vllm 学习】06 - 自顶向下的模型结构层">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/29/nano-vllm/06/index.html">
+<meta property="og:url" content="https://kyonqi.github.io/2026/03/29/nano-vllm/06/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="立志写出让纯夏都能看懂的教程讲解  我们继续自顶向下学习 nano-vllm 的架构，本章我们主要解析其自带支持的 qwen3-8b 的模型结构。本章我们主要解析其自带支持的 qwen3-8b 的模型结构。我们将首先介绍 qwen3 的模型结构，然后从代码入手快速学习了解整个前向推理过程，至于具体的基础算子实现我们放在后面再讲。  模型架构 先简单对 Qwen3 模型有个概念，整体其实很好理解，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/06/qwen3.png">
-<meta property="og:image" content="http://kyonqi.github.io/images/nano-vllm/06/Group-Query-Attention.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/06/qwen3.png">
+<meta property="og:image" content="https://kyonqi.github.io/images/nano-vllm/06/Group-Query-Attention.png">
 <meta property="article:published_time" content="2026-03-29T14:30:00.000Z">
 <meta property="article:modified_time" content="2026-03-31T00:06:25.511Z">
 <meta property="article:author" content="KyonQi">
@@ -34,7 +34,7 @@
 <meta property="article:tag" content="nano-vllm">
 <meta property="article:tag" content="vLLM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/images/nano-vllm/06/qwen3.png">
+<meta name="twitter:image" content="https://kyonqi.github.io/images/nano-vllm/06/qwen3.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -514,7 +514,7 @@
         window.REIMU_POST = {
           author: "KyonQi",
           title: "【nano-vllm 学习】06 - 自顶向下的模型结构层",
-          url: "http://kyonqi.github.io/2026/03/29/nano-vllm/06/",
+          url: "https://kyonqi.github.io/2026/03/29/nano-vllm/06/",
           excerpt: "",
           description: "",
           stripContent: " 立志写出让纯夏都能看懂的教程讲解  我们继续自顶向下学习 nano-vllm 的架构，本章我们主要解析其自带支持的 qwen3-8b 的模型结构。本章我们主要解析其自带支持的 qwen3-8b 的模型结构。我们将首先介绍 qwen3 的模型结构，然后从代码入手快速学习了解整个前向推理过程，至于具体的基础算子实现我们放在后面再讲。  模型架构 先简单对 Qwen3 模型有个概念，整体其实很好理解，就是一个 Decoder-Only 的模型，每个 Decoder 层都有：  RMS Norm + ",

@@ -7,7 +7,7 @@
   
   
   
-  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://kyonqi.github.io';</script>
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
     【CUDA学习】08-GPU 共享内存 | KyonQi&#39;s Blog
   </title>
@@ -21,11 +21,11 @@
     <meta name="description" content="8. 共享内存  基础概念  Bank conflict —— 以矩阵转置为例   其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。  硬件层面的 Bank Conflict 是如何发生的？ 硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【CUDA学习】08-GPU 共享内存">
-<meta property="og:url" content="http://kyonqi.github.io/2026/03/03/cuda/08/index.html">
+<meta property="og:url" content="https://kyonqi.github.io/2026/03/03/cuda/08/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="8. 共享内存  基础概念  Bank conflict —— 以矩阵转置为例   其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。  硬件层面的 Bank Conflict 是如何发生的？ 硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://kyonqi.github.io/2026/03/03/cuda/08/images/cuda/08/bank_conflict.png">
+<meta property="og:image" content="https://kyonqi.github.io/2026/03/03/cuda/08/images/cuda/08/bank_conflict.png">
 <meta property="article:published_time" content="2026-03-03T10:25:00.000Z">
 <meta property="article:modified_time" content="2026-03-05T18:37:45.653Z">
 <meta property="article:author" content="KyonQi">
@@ -33,7 +33,7 @@
 <meta property="article:tag" content="并行计算">
 <meta property="article:tag" content="异构计算">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://kyonqi.github.io/2026/03/03/cuda/08/images/cuda/08/bank_conflict.png">
+<meta name="twitter:image" content="https://kyonqi.github.io/2026/03/03/cuda/08/images/cuda/08/bank_conflict.png">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -511,7 +511,7 @@
         window.REIMU_POST = {
           author: "KyonQi",
           title: "【CUDA学习】08-GPU 共享内存",
-          url: "http://kyonqi.github.io/2026/03/03/cuda/08/",
+          url: "https://kyonqi.github.io/2026/03/03/cuda/08/",
           excerpt: "",
           description: "",
           stripContent: " 8. 共享内存  基础概念  Bank conflict —— 以矩阵转置为例   其实之所以会有所谓的冲突与解决方法，和 硬件实现 是息息相关的。  硬件层面的 Bank Conflict 是如何发生的？ 硬件上，这一大块共享内存，被切分成了 32 个独立的小 SRAM 模块，这就是 Bank。  独立工作： 这 32 个 Bank 拥有各自独立的地址解码器和数据总线。它们可以同时响应各自的读取/写入请求。 交叉编址： 内存地址被像发扑克牌一样，轮流分配给这 32 个 Bank（即地址 0 ",
