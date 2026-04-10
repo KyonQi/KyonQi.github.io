@@ -9,7 +9,7 @@
   
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
-    KyonQi&#39;s Blog
+    从零开始的自研音乐播放器进程 2 | KyonQi&#39;s Blog
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="preload" as="style" href="https://fontsapi.zeoseven.com/292/main/result.css" onload="this.rel='stylesheet'" crossorigin>
@@ -20,14 +20,15 @@
 
     <meta name="description" content="Phase 2 详细实施计划：音乐库 + 基本体验  Context Phase 1 已完成（基础播放功能可用）。Phase 2 的目标是让 app 像一个正经的音乐播放器一样浏览和管理音乐：引入 Room 数据库、按歌曲&#x2F;专辑&#x2F;艺术家&#x2F;文件夹浏览、专辑封面、播放模式、搜索等。   依赖关系总览 12345678910111213141516171819202122232425262728293">
 <meta property="og:type" content="article">
-<meta property="og:title" content="KyonQi&#39;s Blog">
+<meta property="og:title" content="从零开始的自研音乐播放器进程 2">
 <meta property="og:url" content="https://kyonqi.github.io/2026/04/11/music-player/01/phase2-implementation/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="Phase 2 详细实施计划：音乐库 + 基本体验  Context Phase 1 已完成（基础播放功能可用）。Phase 2 的目标是让 app 像一个正经的音乐播放器一样浏览和管理音乐：引入 Room 数据库、按歌曲&#x2F;专辑&#x2F;艺术家&#x2F;文件夹浏览、专辑封面、播放模式、搜索等。   依赖关系总览 12345678910111213141516171819202122232425262728293">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2026-04-10T23:29:26.675Z">
-<meta property="article:modified_time" content="2026-04-10T23:25:53.213Z">
+<meta property="article:published_time" content="2026-04-11T11:25:00.000Z">
+<meta property="article:modified_time" content="2026-04-10T23:30:53.586Z">
 <meta property="article:author" content="KyonQi">
+<meta property="article:tag" content="音乐播放器">
 <meta name="twitter:card" content="summary">
     <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
     <link rel="shortcut icon" href="/images/favicon.ico">
@@ -129,14 +130,13 @@
 <header id="header" aria-label="Site header">
         <picture>
         </picture>
-          <img  fetchpriority="high" src="/images/banner.webp" alt="">
+          <img  fetchpriority="high" src="/images/banner.webp" alt="从零开始的自研音乐播放器进程 2">
   <div id="header-outer">
     <div id="header-title">
           <span id="logo">
-            <h1 data-aos="slide-up">KyonQi&#39;s Blog</h1>
+            <h1 data-aos="slide-up">从零开始的自研音乐播放器进程 2</h1>
           </span>
         <h2 id="subtitle-wrap" data-aos="slide-down">
-              <span id="subtitle">我们终将在宇宙中重逢。 | Reunite amidst the cosmos.</span>
         </h2>
     </div>
   </div>
@@ -223,7 +223,7 @@
     <div class="article-meta">
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
-    <time datetime="2026-04-10T23:29:26.675Z" itemprop="datePublished">2026-04-11</time>
+    <time datetime="2026-04-11T11:25:00.000Z" itemprop="datePublished">2026-04-11</time>
     <time style="display: none;" id="post-update-time">2026-04-11</time>
   </span>
 </div>
@@ -636,8 +636,10 @@
 
     </div>
     <footer class="article-footer">
-      
-      
+        <a class="article-category-link" href="/categories/music-player/" title="music-player" data-aos="zoom-in">music-player</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8/" rel="tag" title="音乐播放器">音乐播放器</a></li></ul>
+
     </footer>
   </div>
     <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
@@ -859,13 +861,13 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "KyonQi",
-          title: "",
+          title: "从零开始的自研音乐播放器进程 2",
           url: "https://kyonqi.github.io/2026/04/11/music-player/01/phase2-implementation/",
           excerpt: "",
           description: "",
           stripContent: " Phase 2 详细实施计划：音乐库 + 基本体验  Context Phase 1 已完成（基础播放功能可用）。Phase 2 的目标是让 app 像一个正经的音乐播放器一样浏览和管理音乐：引入 Room 数据库、按歌曲/专辑/艺术家/文件夹浏览、专辑封面、播放模式、搜索等。   依赖关系总览 123456789101112131415161718192021222324252627282930313233Week 1 (数据层):  libs.versions.toml + build.g",
-          date: "Sat Apr 11 2026 01:29:26 GMT+0200",
-          updated: "Sat Apr 11 2026 01:25:53 GMT+0200",
+          date: "Sat Apr 11 2026 13:25:00 GMT+0200",
+          updated: "Sat Apr 11 2026 01:30:53 GMT+0200",
           cover: "/images/banner.webp",
         };
       </script>
