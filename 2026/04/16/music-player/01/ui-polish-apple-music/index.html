@@ -1,0 +1,974 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+      data-theme-mode="auto"
+  >
+  <head>
+  <meta charset="utf-8">
+  
+  
+  
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
+  <title>
+    从零开始的自研音乐播放器进程 3 UI 优化 | KyonQi&#39;s Blog
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="preload" as="style" href="https://fontsapi.zeoseven.com/292/main/result.css" onload="this.rel='stylesheet'" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap" media="print" onload="this.media='all'">
+    <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_a0oqhord1y.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    
+<link rel="stylesheet" href="/css/loader.css">
+
+    <meta name="description" content="UI 美化方案：仿 Apple Music (iOS)  周期：约 2 周 前置：Phase 2 基础功能完成（已有音乐库浏览、播放器、MiniPlayer） 目标：在保留 Material3 基础组件的前提下，通过自定义组件、动效和视觉语言，让 app 观感接近 Apple Music iOS    设计原则  内容优先：封面图片是视觉核心，其他元素（文字、按钮）都为封面服务 大留白 + 大圆">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的自研音乐播放器进程 3 UI 优化">
+<meta property="og:url" content="https://kyonqi.github.io/2026/04/16/music-player/01/ui-polish-apple-music/index.html">
+<meta property="og:site_name" content="KyonQi&#39;s Blog">
+<meta property="og:description" content="UI 美化方案：仿 Apple Music (iOS)  周期：约 2 周 前置：Phase 2 基础功能完成（已有音乐库浏览、播放器、MiniPlayer） 目标：在保留 Material3 基础组件的前提下，通过自定义组件、动效和视觉语言，让 app 观感接近 Apple Music iOS    设计原则  内容优先：封面图片是视觉核心，其他元素（文字、按钮）都为封面服务 大留白 + 大圆">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-16T16:25:00.000Z">
+<meta property="article:modified_time" content="2026-04-16T16:57:47.688Z">
+<meta property="article:author" content="KyonQi">
+<meta property="article:tag" content="音乐播放器">
+<meta name="twitter:card" content="summary">
+    <link rel="alternate" href="/atom.xml" title="KyonQi's Blog" type="application/atom+xml">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL/toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx/1oA/0l8ysE" crossorigin="anonymous">
+      <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.css" integrity="sha384-tTgKLjMYmJr94v8qu2PE5MUGSMbyN2xiH266JUB3gpm8vnnJywd1dWSOEfrFz+YI" crossorigin="anonymous">
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+      <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+      </div>
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  <script>
+    var time = null;
+    var loaderEl = document.getElementById('loader');
+    var startLoading = () => {
+      time = Date.now();
+      loaderEl.classList.remove("loading");
+    }
+    var hideLoader = () => {
+      document.body.style.overflow = 'auto';
+      loader.classList.add('loading');
+    };
+
+    var endLoading = () => {
+      if (!time) {
+        hideLoader();
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          hideLoader();
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    loaderEl.addEventListener('click', endLoading);
+  </script>
+<div id="copy-tooltip"></div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav" aria-label="Primary navigation">
+        <a class="main-nav-link-wrap" href="/">
+            <div class="main-nav-icon icon rotate">
+                &#xe62b;
+            </div>
+          <span class="main-nav-link">首页</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/archives">
+            <div class="main-nav-icon icon rotate">
+                &#xe62b;
+            </div>
+          <span class="main-nav-link">归档</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/about">
+            <div class="main-nav-icon icon rotate">
+                &#xe62b;
+            </div>
+          <span class="main-nav-link">关于</span>
+        </a>
+        <a class="main-nav-link-wrap" href="/friend">
+            <div class="main-nav-icon icon rotate">
+                &#xe62b;
+            </div>
+          <span class="main-nav-link">友链</span>
+        </a>
+    <a id="main-nav-toggle" class="nav-icon" aria-label="Toggle navigation" role="button"></a>
+  </nav>
+  <nav id="sub-nav" aria-label="Secondary navigation">
+      <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS 订阅" aria-label="RSS 订阅" target="_blank"></a>
+      <a id="nav-search-btn" class="nav-icon popup-trigger" title="搜索" aria-label="搜索"></a>
+  </nav>
+</div>
+<header id="header" aria-label="Site header">
+        <picture>
+        </picture>
+          <img  fetchpriority="high" src="/images/banner.webp" alt="从零开始的自研音乐播放器进程 3 UI 优化">
+  <div id="header-outer">
+    <div id="header-title">
+          <span id="logo">
+            <h1 data-aos="slide-up">从零开始的自研音乐播放器进程 3 UI 优化</h1>
+          </span>
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+        </h2>
+    </div>
+  </div>
+</header>
+
+        <div id="content" aria-label="Page content"  class="sidebar-right" >
+          <aside id="sidebar" aria-label="Sidebar">
+  <div class="sidebar-wrapper-container sticky">
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ui-%E7%BE%8E%E5%8C%96%E6%96%B9%E6%A1%88%E4%BB%BF-apple-music-ios"><span class="toc-number">1.</span> <span class="toc-text"> UI 美化方案：仿 Apple Music (iOS)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="toc-number">1.1.</span> <span class="toc-text"> 设计原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8C%E7%A8%8B%E7%A2%91%E9%AA%8C%E6%94%B6%E6%A0%87%E5%87%86"><span class="toc-number">1.2.</span> <span class="toc-text"> 里程碑验收标准</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E6%96%B0%E5%A2%9E"><span class="toc-number">1.3.</span> <span class="toc-text"> 依赖新增</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#gradlelibsversionstoml"><span class="toc-number">1.3.1.</span> <span class="toc-text"> gradle&#x2F;libs.versions.toml</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#appbuildgradlekts"><span class="toc-number">1.3.2.</span> <span class="toc-text"> app&#x2F;build.gradle.kts</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC-1-%E5%91%A8%E9%AA%A8%E6%9E%B6%E9%87%8D%E6%9E%84"><span class="toc-number">1.4.</span> <span class="toc-text"> 第 1 周：骨架重构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E5%BA%95%E9%83%A8-tabbar-%E6%9B%BF%E6%8D%A2%E9%A1%B6%E9%83%A8-tabrow"><span class="toc-number">1.4.1.</span> <span class="toc-text"> 1.1 底部 TabBar 替换顶部 TabRow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-largetopappbar-%E5%A4%A7%E6%A0%87%E9%A2%98%E6%BB%9A%E5%8A%A8%E8%81%94%E5%8A%A8"><span class="toc-number">1.4.2.</span> <span class="toc-text"> 1.2 LargeTopAppBar + 大标题滚动联动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E5%88%86%E7%BB%84%E5%9C%86%E8%A7%92%E5%88%97%E8%A1%A8%E5%8D%A1%E7%89%87%E6%A0%B7%E5%BC%8F"><span class="toc-number">1.4.3.</span> <span class="toc-text"> 1.3 分组圆角列表卡片样式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC-2-%E5%91%A8%E5%8A%A8%E6%95%88-nowplaying-%E6%B2%89%E6%B5%B8%E5%BC%8F"><span class="toc-number">1.5.</span> <span class="toc-text"> 第 2 周：动效 + NowPlaying 沉浸式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E5%B0%81%E9%9D%A2%E4%B8%BB%E8%89%B2%E6%8F%90%E5%8F%96%E5%B7%A5%E5%85%B7"><span class="toc-number">1.5.1.</span> <span class="toc-text"> 2.1 封面主色提取工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-nowplayingscreen-%E6%B2%89%E6%B5%B8%E5%BC%8F%E9%87%8D%E6%9E%84"><span class="toc-number">1.5.2.</span> <span class="toc-text"> 2.2 NowPlayingScreen 沉浸式重构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%E8%BD%AC%E5%9C%BAminiplayer-nowplaying"><span class="toc-number">1.5.3.</span> <span class="toc-text"> 2.3 共享元素转场：MiniPlayer → NowPlaying</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-spring-%E5%8A%A8%E6%95%88%E5%85%A8%E5%B1%80%E6%9B%BF%E6%8D%A2"><span class="toc-number">1.5.4.</span> <span class="toc-text"> 2.4 Spring 动效全局替换</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E4%BB%B6%E6%A3%80%E6%9F%A5%E8%A1%A8"><span class="toc-number">1.6.</span> <span class="toc-text"> 组件检查表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%96%BD%E9%A1%BA%E5%BA%8F%E9%A3%8E%E9%99%A9%E6%8E%92%E5%BA%8F"><span class="toc-number">1.7.</span> <span class="toc-text"> 实施顺序（风险排序）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E5%9C%A8%E6%9C%AC%E6%96%B9%E6%A1%88%E8%8C%83%E5%9B%B4"><span class="toc-number">1.8.</span> <span class="toc-text"> 不在本方案范围</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E6%B8%85%E5%8D%95"><span class="toc-number">1.9.</span> <span class="toc-text"> 测试清单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB%E5%AE%9E%E6%96%BD%E6%97%B6%E5%8F%82%E8%80%83"><span class="toc-number">1.10.</span> <span class="toc-text"> 延伸阅读（实施时参考）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%87%E6%B3%A8"><span class="toc-number">1.11.</span> <span class="toc-text"> 备注</span></a></li></ol></li></ol>
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="KyonQi" class="lazyload">
+  <div class="sidebar-author-name">KyonQi</div>
+  <div class="sidebar-description">我永远也不会原谅想要写小说的程序员</div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">23</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">4</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">8</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+    <div class="icon-github sidebar-social-icon">
+      <a href=https://github.com/KyonQi itemprop="url" target="_blank" aria-label="github" rel="noopener nofollow noreferrer"></a>
+    </div>
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+    </div>
+  </div>
+  <div class="sidebar-widget">
+  </div>
+  </div>
+</aside>
+
+          <section id="main" aria-label="Main content"><article id="post-music-player/01/ui-polish-apple-music" class="h-entry article" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-04-16T16:25:00.000Z" itemprop="datePublished">2026-04-16</time>
+    <time style="display: none;" id="post-update-time">2026-04-16</time>
+  </span>
+</div>
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+        <h1 id="ui-美化方案仿-apple-music-ios"><a class="markdownIt-Anchor" href="#ui-美化方案仿-apple-music-ios"></a> UI 美化方案：仿 Apple Music (iOS)</h1>
+<blockquote>
+<p>周期：约 2 周<br />
+前置：Phase 2 基础功能完成（已有音乐库浏览、播放器、MiniPlayer）<br />
+目标：在保留 Material3 基础组件的前提下，通过自定义组件、动效和视觉语言，让 app 观感接近 Apple Music iOS</p>
+</blockquote>
+<hr />
+<h2 id="设计原则"><a class="markdownIt-Anchor" href="#设计原则"></a> 设计原则</h2>
+<ol>
+<li><strong>内容优先</strong>：封面图片是视觉核心，其他元素（文字、按钮）都为封面服务</li>
+<li><strong>大留白 + 大圆角</strong>：间距宽松（16<sub>24dp），圆角偏大（12</sub>24dp）</li>
+<li><strong>弹性动效</strong>：所有过渡使用 spring，避免线性/匀速动画</li>
+<li><strong>动态取色</strong>：基于当前歌曲封面提取主色调，驱动渐变和强调色</li>
+<li><strong>底部 Tab Bar</strong>：符合 iOS 导航习惯，同时对 Android 大屏幕单手操作也更友好</li>
+<li><strong>分组圆角卡片列表</strong>：替代 Material 传统 ListItem 的分隔线风格</li>
+</ol>
+<hr />
+<h2 id="里程碑验收标准"><a class="markdownIt-Anchor" href="#里程碑验收标准"></a> 里程碑验收标准</h2>
+<ul>
+<li>[ ] 底部 Tab Bar 替换当前的顶部 TabRow</li>
+<li>[ ] NowPlayingScreen 使用动态渐变背景，颜色从当前封面提取</li>
+<li>[ ] MiniPlayer → NowPlaying 使用共享元素转场（封面平滑放大）</li>
+<li>[ ] 所有列表使用圆角卡片风格，统一 elevation / shadow 语言</li>
+<li>[ ] 大标题 TopBar（LargeTopAppBar），滚动时平滑过渡到小标题</li>
+<li>[ ] Spring 动效替换所有默认线性动画</li>
+<li>[ ] 封面加载支持占位图渐入，列表滚动流畅无掉帧</li>
+<li>[ ] 浅色/深色主题都通过封面动态取色调整</li>
+</ul>
+<hr />
+<h2 id="依赖新增"><a class="markdownIt-Anchor" href="#依赖新增"></a> 依赖新增</h2>
+<h3 id="gradlelibsversionstoml"><a class="markdownIt-Anchor" href="#gradlelibsversionstoml"></a> <code>gradle/libs.versions.toml</code></h3>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[versions]</span></span><br><span class="line"><span class="attr">palette</span> = <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line"><span class="attr">haze</span> = <span class="string">&quot;1.2.2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="section">[libraries]</span></span><br><span class="line"><span class="attr">androidx-palette</span> = &#123; group = <span class="string">&quot;androidx.palette&quot;</span>, name = <span class="string">&quot;palette-ktx&quot;</span>, version.ref = <span class="string">&quot;palette&quot;</span> &#125;</span><br><span class="line"><span class="attr">haze</span> = &#123; group = <span class="string">&quot;dev.chrisbanes.haze&quot;</span>, name = <span class="string">&quot;haze&quot;</span>, version.ref = <span class="string">&quot;haze&quot;</span> &#125;</span><br><span class="line"><span class="attr">haze-materials</span> = &#123; group = <span class="string">&quot;dev.chrisbanes.haze&quot;</span>, name = <span class="string">&quot;haze-materials&quot;</span>, version.ref = <span class="string">&quot;haze&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="appbuildgradlekts"><a class="markdownIt-Anchor" href="#appbuildgradlekts"></a> <code>app/build.gradle.kts</code></h3>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Palette - 从封面提取主色</span></span><br><span class="line">implementation(libs.androidx.palette)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Haze - 毛玻璃效果</span></span><br><span class="line">implementation(libs.haze)</span><br><span class="line">implementation(libs.haze.materials)</span><br></pre></td></tr></table></figure>
+<p><strong>说明</strong>：</p>
+<ul>
+<li><code>androidx.palette</code>：Google 官方库，从 Bitmap 提取 dominant / vibrant / muted 等主色</li>
+<li><code>Haze</code>：Chris Banes 的社区库，在 Compose 里做真正的背景模糊 + 饱和度补偿，比 <code>Modifier.blur</code> 更接近 iOS <code>UIVisualEffectView</code></li>
+</ul>
+<hr />
+<h2 id="第-1-周骨架重构"><a class="markdownIt-Anchor" href="#第-1-周骨架重构"></a> 第 1 周：骨架重构</h2>
+<h3 id="11-底部-tabbar-替换顶部-tabrow"><a class="markdownIt-Anchor" href="#11-底部-tabbar-替换顶部-tabrow"></a> 1.1 底部 TabBar 替换顶部 TabRow</h3>
+<p><strong>目标</strong>：把 <code>LibraryScreen</code> 里顶部 4 个 Tab（歌曲 / 专辑 / 艺术家 / 文件夹）搬到屏幕底部，作为全局导航的一部分。</p>
+<p><strong>改动文件</strong>：</p>
+<ul>
+<li><code>ui/navigation/AppNavigation.kt</code> — 顶层增加 <code>NavigationBar</code></li>
+<li><code>ui/screen/LibraryScreen.kt</code> — 移除 <code>TabRow</code>，每个 tab 拆成独立路由</li>
+<li>新建 <code>ui/screen/SongsTabScreen.kt</code>、<code>AlbumsTabScreen.kt</code>、<code>ArtistsTabScreen.kt</code>、<code>FoldersTabScreen.kt</code>（也可以保持共用 LibraryViewModel）</li>
+</ul>
+<p><strong>架构调整</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">当前：</span><br><span class="line">AppNavigation</span><br><span class="line">├── library (包含 TabRow + 4 个子屏)</span><br><span class="line">└── now_playing</span><br><span class="line"></span><br><span class="line">改为：</span><br><span class="line">AppNavigation</span><br><span class="line">├── library_songs</span><br><span class="line">├── library_albums</span><br><span class="line">├── library_artists</span><br><span class="line">├── library_folders</span><br><span class="line">├── album_detail/&#123;id&#125;</span><br><span class="line">├── artist_detail/&#123;id&#125;</span><br><span class="line">├── search</span><br><span class="line">└── now_playing (全屏)</span><br></pre></td></tr></table></figure>
+<p><strong>底部栏伪代码</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">AppNavigation</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> navController = rememberNavController()</span><br><span class="line">    <span class="keyword">val</span> currentRoute <span class="keyword">by</span> navController.currentBackStackEntryAsState()</span><br><span class="line">        .let &#123; entry -&gt; derivedStateOf &#123; entry.value?.destination?.route &#125; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> tabRoutes = setOf(</span><br><span class="line">        <span class="string">&quot;library_songs&quot;</span>, <span class="string">&quot;library_albums&quot;</span>,</span><br><span class="line">        <span class="string">&quot;library_artists&quot;</span>, <span class="string">&quot;library_folders&quot;</span></span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">val</span> hiddenRoutes = setOf(<span class="string">&quot;now_playing&quot;</span>)</span><br><span class="line">    <span class="keyword">val</span> showTabBar = currentRoute <span class="keyword">in</span> tabRoutes</span><br><span class="line"></span><br><span class="line">    Scaffold(</span><br><span class="line">        bottomBar = &#123;</span><br><span class="line">            <span class="keyword">if</span> (currentRoute !<span class="keyword">in</span> hiddenRoutes) &#123;</span><br><span class="line">                Column &#123;</span><br><span class="line">                    MiniPlayer(onClick = &#123; navController.navigate(<span class="string">&quot;now_playing&quot;</span>) &#125;)</span><br><span class="line">                    <span class="keyword">if</span> (showTabBar) &#123;</span><br><span class="line">                        NavigationBar &#123;</span><br><span class="line">                            NavigationBarItem(</span><br><span class="line">                                selected = currentRoute == <span class="string">&quot;library_songs&quot;</span>,</span><br><span class="line">                                onClick = &#123; navController.navigate(<span class="string">&quot;library_songs&quot;</span>) &#125;,</span><br><span class="line">                                icon = &#123; Icon(Icons.Default.MusicNote, <span class="literal">null</span>) &#125;,</span><br><span class="line">                                label = &#123; Text(<span class="string">&quot;歌曲&quot;</span>) &#125;</span><br><span class="line">                            )</span><br><span class="line">                            <span class="comment">// ... 其他 3 个 tab</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ) &#123; padding -&gt;</span><br><span class="line">        NavHost(</span><br><span class="line">            navController = navController,</span><br><span class="line">            startDestination = <span class="string">&quot;library_songs&quot;</span>,</span><br><span class="line">            modifier = Modifier.padding(padding),</span><br><span class="line">        ) &#123;</span><br><span class="line">            <span class="comment">// ... 路由定义</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>要点</strong>：</p>
+<ul>
+<li><code>MiniPlayer</code> 在 <code>NavigationBar</code> 上方（顺序：MiniPlayer → NavigationBar）</li>
+<li>进入 NowPlaying 时整个 <code>bottomBar</code> 都隐藏（包括 MiniPlayer 和 Tab Bar）</li>
+<li>离开 library tabs 进入详情页（专辑详情、艺术家详情）时 Tab Bar 隐藏，只保留 MiniPlayer</li>
+</ul>
+<hr />
+<h3 id="12-largetopappbar-大标题滚动联动"><a class="markdownIt-Anchor" href="#12-largetopappbar-大标题滚动联动"></a> 1.2 LargeTopAppBar + 大标题滚动联动</h3>
+<p><strong>目标</strong>：每个 tab 页顶部显示大标题（类似 iOS &quot;歌曲&quot;两个大字），列表向上滚时大标题平滑缩小成普通 TopAppBar 标题。</p>
+<p><strong>改动文件</strong>：</p>
+<ul>
+<li><code>ui/screen/SongListScreen.kt</code></li>
+<li><code>ui/screen/AlbumListScreen.kt</code></li>
+<li><code>ui/screen/ArtistListScreen.kt</code></li>
+<li><code>ui/screen/FolderBrowserScreen.kt</code></li>
+</ul>
+<p><strong>伪代码</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@OptIn(ExperimentalMaterial3Api::class)</span></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">SongListScreen</span><span class="params">(...)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()</span><br><span class="line"></span><br><span class="line">    Scaffold(</span><br><span class="line">        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),</span><br><span class="line">        topBar = &#123;</span><br><span class="line">            LargeTopAppBar(</span><br><span class="line">                title = &#123; Text(<span class="string">&quot;歌曲&quot;</span>) &#125;,</span><br><span class="line">                scrollBehavior = scrollBehavior,</span><br><span class="line">                colors = TopAppBarDefaults.largeTopAppBarColors(</span><br><span class="line">                    containerColor = Color.Transparent,</span><br><span class="line">                    scrolledContainerColor = MaterialTheme.colorScheme.surface,</span><br><span class="line">                ),</span><br><span class="line">            )</span><br><span class="line">        &#125;</span><br><span class="line">    ) &#123; padding -&gt;</span><br><span class="line">        LazyColumn(</span><br><span class="line">            contentPadding = padding,</span><br><span class="line">            modifier = Modifier.fillMaxSize(),</span><br><span class="line">        ) &#123;</span><br><span class="line">            items(...) &#123; ... &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>要点</strong>：</p>
+<ul>
+<li><code>exitUntilCollapsedScrollBehavior</code> 滚动时大标题先缩小再贴到顶部</li>
+<li>透明 container color 让下面的内容能&quot;透过&quot; TopBar 背景，配合后续的渐变背景</li>
+</ul>
+<hr />
+<h3 id="13-分组圆角列表卡片样式"><a class="markdownIt-Anchor" href="#13-分组圆角列表卡片样式"></a> 1.3 分组圆角列表卡片样式</h3>
+<p><strong>目标</strong>：列表项从&quot;ListItem + 分隔线&quot;改成&quot;Surface + 圆角 + 淡阴影&quot;的卡片风格，类似 Apple Music 歌曲列表的那种&quot;每一首歌独立一张小卡&quot;。</p>
+<p><strong>方案 A</strong>：每个 item 单独一张卡片（iOS Apple Music 的现代做法）<br />
+<strong>方案 B</strong>：整组 item 共享一张大卡片，内部用分隔线（iOS 设置页的做法）</p>
+<p>推荐 <strong>A</strong> 对歌曲列表，<strong>B</strong> 对专辑详情页的曲目列表。</p>
+<p><strong>新建</strong> <code>ui/component/MusicListItem.kt</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">MusicListItem</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    title: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    subtitle: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    leadingContent: @<span class="type">Composable</span> () -&gt; <span class="type">Unit</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    trailingContent: (@<span class="type">Composable</span> () -&gt; <span class="type">Unit</span>)? = <span class="literal">null</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    onClick: () -&gt; <span class="type">Unit</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    modifier: <span class="type">Modifier</span> = Modifier,</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">    Surface(</span><br><span class="line">        modifier = modifier</span><br><span class="line">            .fillMaxWidth()</span><br><span class="line">            .padding(horizontal = <span class="number">16.</span>dp, vertical = <span class="number">4.</span>dp)</span><br><span class="line">            .clip(RoundedCornerShape(<span class="number">16.</span>dp))</span><br><span class="line">            .clickable(onClick = onClick),</span><br><span class="line">        color = MaterialTheme.colorScheme.surfaceContainer,</span><br><span class="line">        shape = RoundedCornerShape(<span class="number">16.</span>dp),</span><br><span class="line">    ) &#123;</span><br><span class="line">        Row(</span><br><span class="line">            modifier = Modifier.padding(<span class="number">12.</span>dp),</span><br><span class="line">            verticalAlignment = Alignment.CenterVertically,</span><br><span class="line">        ) &#123;</span><br><span class="line">            leadingContent()</span><br><span class="line">            Spacer(Modifier.width(<span class="number">12.</span>dp))</span><br><span class="line">            Column(modifier = Modifier.weight(<span class="number">1f</span>)) &#123;</span><br><span class="line">                Text(title, style = MaterialTheme.typography.titleMedium, maxLines = <span class="number">1</span>, overflow = TextOverflow.Ellipsis)</span><br><span class="line">                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = <span class="number">1</span>, overflow = TextOverflow.Ellipsis)</span><br><span class="line">            &#125;</span><br><span class="line">            trailingContent?.invoke()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后 <code>SongListItem</code> 改用这个组件：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="keyword">internal</span> <span class="function"><span class="keyword">fun</span> <span class="title">SongListItem</span><span class="params">(track: <span class="type">TrackEntity</span>, onClick: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    MusicListItem(</span><br><span class="line">        title = track.title,</span><br><span class="line">        subtitle = <span class="string">&quot;<span class="subst">$&#123;track.artist&#125;</span> · <span class="subst">$&#123;formatDuration(track.durationMs)&#125;</span>&quot;</span>,</span><br><span class="line">        leadingContent = &#123;</span><br><span class="line">            AlbumArt(</span><br><span class="line">                uri = track.uri.toUri(),</span><br><span class="line">                size = <span class="number">56.</span>dp,</span><br><span class="line">                modifier = Modifier.clip(RoundedCornerShape(<span class="number">8.</span>dp)),</span><br><span class="line">            )</span><br><span class="line">        &#125;,</span><br><span class="line">        onClick = onClick,</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="第-2-周动效-nowplaying-沉浸式"><a class="markdownIt-Anchor" href="#第-2-周动效-nowplaying-沉浸式"></a> 第 2 周：动效 + NowPlaying 沉浸式</h2>
+<h3 id="21-封面主色提取工具"><a class="markdownIt-Anchor" href="#21-封面主色提取工具"></a> 2.1 封面主色提取工具</h3>
+<p><strong>新建</strong> <code>ui/theme/PaletteExtractor.kt</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> io.kyonqi.musicplayer.ui.theme</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.graphics.Bitmap</span><br><span class="line"><span class="keyword">import</span> androidx.compose.runtime.Composable</span><br><span class="line"><span class="keyword">import</span> androidx.compose.runtime.LaunchedEffect</span><br><span class="line"><span class="keyword">import</span> androidx.compose.runtime.State</span><br><span class="line"><span class="keyword">import</span> androidx.compose.runtime.mutableStateOf</span><br><span class="line"><span class="keyword">import</span> androidx.compose.runtime.remember</span><br><span class="line"><span class="keyword">import</span> androidx.compose.ui.graphics.Color</span><br><span class="line"><span class="keyword">import</span> androidx.compose.ui.platform.LocalContext</span><br><span class="line"><span class="keyword">import</span> androidx.palette.graphics.Palette</span><br><span class="line"><span class="keyword">import</span> coil3.ImageLoader</span><br><span class="line"><span class="keyword">import</span> coil3.asDrawable</span><br><span class="line"><span class="keyword">import</span> coil3.imageLoader</span><br><span class="line"><span class="keyword">import</span> coil3.request.ImageRequest</span><br><span class="line"><span class="keyword">import</span> coil3.request.SuccessResult</span><br><span class="line"><span class="keyword">import</span> coil3.request.allowHardware</span><br><span class="line"><span class="keyword">import</span> kotlinx.coroutines.Dispatchers</span><br><span class="line"><span class="keyword">import</span> kotlinx.coroutines.withContext</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 从音频 URI 异步提取主色（dominant + muted），用于驱动动态背景</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">rememberDominantColor</span><span class="params">(uri: <span class="type">android</span>.<span class="type">net</span>.<span class="type">Uri</span>?)</span></span>: State&lt;Pair&lt;Color, Color&gt;?&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> state = remember(uri) &#123; mutableStateOf&lt;Pair&lt;Color, Color&gt;?&gt;(<span class="literal">null</span>) &#125;</span><br><span class="line">    <span class="keyword">val</span> context = LocalContext.current</span><br><span class="line"></span><br><span class="line">    LaunchedEffect(uri) &#123;</span><br><span class="line">        <span class="keyword">if</span> (uri == <span class="literal">null</span>) &#123;</span><br><span class="line">            state.value = <span class="literal">null</span></span><br><span class="line">            <span class="keyword">return</span><span class="symbol">@LaunchedEffect</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">val</span> result = context.imageLoader.execute(</span><br><span class="line">            ImageRequest.Builder(context)</span><br><span class="line">                .<span class="keyword">data</span>(uri)</span><br><span class="line">                .allowHardware(<span class="literal">false</span>) <span class="comment">// Palette 需要软件位图</span></span><br><span class="line">                .build()</span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">val</span> bitmap = (result <span class="keyword">as</span>? SuccessResult)?.image?.asDrawable(context.resources)</span><br><span class="line">            ?.let &#123; drawable -&gt;</span><br><span class="line">                <span class="comment">// 转 Bitmap</span></span><br><span class="line">                <span class="keyword">val</span> w = drawable.intrinsicWidth.coerceAtLeast(<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">val</span> h = drawable.intrinsicHeight.coerceAtLeast(<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">val</span> bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)</span><br><span class="line">                <span class="keyword">val</span> canvas = android.graphics.Canvas(bmp)</span><br><span class="line">                drawable.setBounds(<span class="number">0</span>, <span class="number">0</span>, w, h)</span><br><span class="line">                drawable.draw(canvas)</span><br><span class="line">                bmp</span><br><span class="line">            &#125; ?: <span class="keyword">return</span><span class="symbol">@LaunchedEffect</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">val</span> palette = withContext(Dispatchers.Default) &#123;</span><br><span class="line">            Palette.from(bitmap).maximumColorCount(<span class="number">16</span>).generate()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">val</span> dominant = palette.getDominantColor(<span class="number">0xFF1A1A1A</span>.toInt())</span><br><span class="line">        <span class="keyword">val</span> muted = palette.getMutedColor(dominant)</span><br><span class="line">        state.value = Color(dominant) to Color(muted)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr />
+<h3 id="22-nowplayingscreen-沉浸式重构"><a class="markdownIt-Anchor" href="#22-nowplayingscreen-沉浸式重构"></a> 2.2 NowPlayingScreen 沉浸式重构</h3>
+<p><strong>目标</strong>：</p>
+<ul>
+<li>整屏背景用当前封面的主色做径向/线性渐变</li>
+<li>封面大图带轻微缩放动效（正在播放时微妙放大 1.02x，类似 Apple Music）</li>
+<li>歌曲标题 + 艺术家 + 进度条 + 按钮布局更紧凑，间距统一</li>
+</ul>
+<p><strong>改动文件</strong>：<code>ui/screen/NowPlayingScreen.kt</code></p>
+<p><strong>关键片段</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">NowPlayingScreen</span><span class="params">(onBack: () -&gt; <span class="type">Unit</span>, viewModel: <span class="type">NowPlayingViewModel</span> = hiltViewModel()</span></span>) &#123;</span><br><span class="line">    <span class="keyword">val</span> state <span class="keyword">by</span> viewModel.playbackState.collectAsStateWithLifecycle()</span><br><span class="line">    <span class="keyword">val</span> colors <span class="keyword">by</span> rememberDominantColor(state.currentTrack?.uri)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> (dominant, muted) = colors ?: (MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.surfaceVariant)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 背景渐变过渡动画</span></span><br><span class="line">    <span class="keyword">val</span> animatedDominant <span class="keyword">by</span> animateColorAsState(</span><br><span class="line">        targetValue = dominant,</span><br><span class="line">        animationSpec = tween(<span class="number">800</span>),</span><br><span class="line">        label = <span class="string">&quot;dominant&quot;</span></span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">val</span> animatedMuted <span class="keyword">by</span> animateColorAsState(</span><br><span class="line">        targetValue = muted,</span><br><span class="line">        animationSpec = tween(<span class="number">800</span>),</span><br><span class="line">        label = <span class="string">&quot;muted&quot;</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 封面正在播放时轻微放大</span></span><br><span class="line">    <span class="keyword">val</span> coverScale <span class="keyword">by</span> animateFloatAsState(</span><br><span class="line">        targetValue = <span class="keyword">if</span> (state.isPlaying) <span class="number">1.0f</span> <span class="keyword">else</span> <span class="number">0.92f</span>,</span><br><span class="line">        animationSpec = spring(dampingRatio = <span class="number">0.6f</span>, stiffness = Spring.StiffnessLow),</span><br><span class="line">        label = <span class="string">&quot;coverScale&quot;</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    Box(</span><br><span class="line">        modifier = Modifier</span><br><span class="line">            .fillMaxSize()</span><br><span class="line">            .background(</span><br><span class="line">                Brush.verticalGradient(</span><br><span class="line">                    colors = listOf(animatedDominant, animatedMuted, Color.Black.copy(alpha = <span class="number">0.6f</span>)),</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">    ) &#123;</span><br><span class="line">        Scaffold(</span><br><span class="line">            containerColor = Color.Transparent,</span><br><span class="line">            topBar = &#123; <span class="comment">/* 透明 TopAppBar，只保留返回按钮 */</span> &#125;,</span><br><span class="line">        ) &#123; padding -&gt;</span><br><span class="line">            Column(</span><br><span class="line">                modifier = Modifier.fillMaxSize().padding(padding).padding(<span class="number">24.</span>dp),</span><br><span class="line">                horizontalAlignment = Alignment.CenterHorizontally,</span><br><span class="line">            ) &#123;</span><br><span class="line">                Spacer(Modifier.weight(<span class="number">1f</span>))</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 封面</span></span><br><span class="line">                AlbumArt(</span><br><span class="line">                    uri = state.currentTrack?.uri,</span><br><span class="line">                    size = <span class="number">320.</span>dp,</span><br><span class="line">                    modifier = Modifier</span><br><span class="line">                        .graphicsLayer &#123;</span><br><span class="line">                            scaleX = coverScale</span><br><span class="line">                            scaleY = coverScale</span><br><span class="line">                        &#125;</span><br><span class="line">                        .clip(RoundedCornerShape(<span class="number">20.</span>dp))</span><br><span class="line">                        .shadow(<span class="number">32.</span>dp, RoundedCornerShape(<span class="number">20.</span>dp)),</span><br><span class="line">                )</span><br><span class="line"></span><br><span class="line">                Spacer(Modifier.weight(<span class="number">1f</span>))</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 标题、艺术家</span></span><br><span class="line">                Text(state.currentTrack?.title ?: <span class="string">&quot;未播放&quot;</span>, style = MaterialTheme.typography.headlineMedium, color = Color.White)</span><br><span class="line">                Text(state.currentTrack?.artist ?: <span class="string">&quot;&quot;</span>, style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = <span class="number">0.7f</span>))</span><br><span class="line"></span><br><span class="line">                Spacer(Modifier.height(<span class="number">24.</span>dp))</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 进度条（自定义样式）</span></span><br><span class="line">                ProgressBar(...)</span><br><span class="line"></span><br><span class="line">                Spacer(Modifier.height(<span class="number">24.</span>dp))</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 播放器按钮</span></span><br><span class="line">                PlayerControls(...)</span><br><span class="line"></span><br><span class="line">                Spacer(Modifier.weight(<span class="number">1f</span>))</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>要点</strong>：</p>
+<ul>
+<li>背景渐变：<code>Brush.verticalGradient</code> 用动态颜色</li>
+<li><code>animateColorAsState</code> 切歌时颜色平滑过渡</li>
+<li><code>animateFloatAsState</code> + <code>spring</code> 做封面缩放（dampingRatio 0.6 是经典弹性感）</li>
+<li>所有文字用 <code>Color.White</code>（因为背景是深色），或根据 <code>dominant.luminance()</code> 自适应</li>
+</ul>
+<hr />
+<h3 id="23-共享元素转场miniplayer-nowplaying"><a class="markdownIt-Anchor" href="#23-共享元素转场miniplayer-nowplaying"></a> 2.3 共享元素转场：MiniPlayer → NowPlaying</h3>
+<p><strong>目标</strong>：点击 MiniPlayer 的封面时，封面从小尺寸平滑放大到 NowPlayingScreen 的大尺寸，同时 MiniPlayer 其他元素淡出，NowPlaying 其他元素淡入。</p>
+<p><strong>前置</strong>：Compose 1.7+ 的 <code>SharedTransitionLayout</code>，查看 <code>libs.versions.toml</code> 确认 compose-bom 版本（当前 2024.09.00 应该包含）。</p>
+<p><strong>改动文件</strong>：</p>
+<ul>
+<li><code>ui/navigation/AppNavigation.kt</code> — 外层包一个 <code>SharedTransitionLayout</code></li>
+<li><code>ui/component/MiniPlayer.kt</code> — AlbumArt 上加 <code>sharedElement</code> modifier</li>
+<li><code>ui/screen/NowPlayingScreen.kt</code> — 大封面加 <code>sharedElement</code> modifier</li>
+</ul>
+<p><strong>伪代码</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@OptIn(ExperimentalSharedTransitionApi::class)</span></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">AppNavigation</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> navController = rememberNavController()</span><br><span class="line"></span><br><span class="line">    SharedTransitionLayout &#123;</span><br><span class="line">        NavHost(...) &#123;</span><br><span class="line">            composable(<span class="string">&quot;library_songs&quot;</span>) &#123; backStackEntry -&gt;</span><br><span class="line">                with(<span class="keyword">this</span><span class="symbol">@SharedTransitionLayout</span>) &#123;</span><br><span class="line">                    SongListScreen(</span><br><span class="line">                        miniPlayerCoverModifier = Modifier.sharedElement(</span><br><span class="line">                            state = rememberSharedContentState(key = <span class="string">&quot;cover&quot;</span>),</span><br><span class="line">                            animatedVisibilityScope = <span class="keyword">this</span><span class="symbol">@composable</span>,</span><br><span class="line">                        ),</span><br><span class="line">                        ...</span><br><span class="line">                    )</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            composable(<span class="string">&quot;now_playing&quot;</span>) &#123;</span><br><span class="line">                with(<span class="keyword">this</span><span class="symbol">@SharedTransitionLayout</span>) &#123;</span><br><span class="line">                    NowPlayingScreen(</span><br><span class="line">                        coverModifier = Modifier.sharedElement(</span><br><span class="line">                            state = rememberSharedContentState(key = <span class="string">&quot;cover&quot;</span>),</span><br><span class="line">                            animatedVisibilityScope = <span class="keyword">this</span><span class="symbol">@composable</span>,</span><br><span class="line">                        ),</span><br><span class="line">                    )</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>说明</strong>：共享元素 API 略啰嗦，实施时可以抽一个 <code>LocalSharedTransitionScope</code>（CompositionLocal）避免每个 composable 都手动穿透 scope。</p>
+<hr />
+<h3 id="24-spring-动效全局替换"><a class="markdownIt-Anchor" href="#24-spring-动效全局替换"></a> 2.4 Spring 动效全局替换</h3>
+<p><strong>目标</strong>：把所有默认的 <code>tween</code> 动画替换成 <code>spring</code>，给 app 一个统一的&quot;弹性感&quot;。</p>
+<p><strong>新建</strong> <code>ui/theme/MotionDefaults.kt</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> io.kyonqi.musicplayer.ui.theme</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> androidx.compose.animation.core.Spring</span><br><span class="line"><span class="keyword">import</span> androidx.compose.animation.core.spring</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 全局动效参数，仿 Apple Music 的弹性曲线</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">object</span> MotionDefaults &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">standard</span><span class="params">()</span></span> = spring&lt;T&gt;(</span><br><span class="line">        dampingRatio = Spring.DampingRatioNoBouncy,</span><br><span class="line">        stiffness = Spring.StiffnessMediumLow,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">bouncy</span><span class="params">()</span></span> = spring&lt;T&gt;(</span><br><span class="line">        dampingRatio = <span class="number">0.6f</span>,</span><br><span class="line">        stiffness = Spring.StiffnessLow,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">subtle</span><span class="params">()</span></span> = spring&lt;T&gt;(</span><br><span class="line">        dampingRatio = Spring.DampingRatioNoBouncy,</span><br><span class="line">        stiffness = Spring.StiffnessHigh,</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在使用动画的地方：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> scale <span class="keyword">by</span> animateFloatAsState(</span><br><span class="line">    targetValue = ...,</span><br><span class="line">    animationSpec = MotionDefaults.bouncy(),</span><br><span class="line">    label = <span class="string">&quot;scale&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="组件检查表"><a class="markdownIt-Anchor" href="#组件检查表"></a> 组件检查表</h2>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>文件</th>
+<th>是否要改</th>
+<th>改动类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MiniPlayer</code></td>
+<td><code>ui/component/MiniPlayer.kt</code></td>
+<td>✅</td>
+<td>加共享元素 key、布局微调</td>
+</tr>
+<tr>
+<td><code>AlbumArt</code></td>
+<td><code>ui/component/AlbumArt.kt</code></td>
+<td>⚠️ 可选</td>
+<td>加阴影、圆角参数</td>
+</tr>
+<tr>
+<td><code>LibraryScreen</code></td>
+<td><code>ui/screen/LibraryScreen.kt</code></td>
+<td>✅</td>
+<td>移除 TabRow，拆成独立路由</td>
+</tr>
+<tr>
+<td><code>SongListScreen</code></td>
+<td><code>ui/screen/SongListScreen.kt</code></td>
+<td>✅</td>
+<td>LargeTopAppBar + 圆角卡片</td>
+</tr>
+<tr>
+<td><code>AlbumListScreen</code></td>
+<td><code>ui/screen/AlbumListScreen.kt</code></td>
+<td>✅</td>
+<td>LargeTopAppBar + 网格卡片圆角优化</td>
+</tr>
+<tr>
+<td><code>ArtistListScreen</code></td>
+<td><code>ui/screen/ArtistListScreen.kt</code></td>
+<td>✅</td>
+<td>LargeTopAppBar + 圆角卡片</td>
+</tr>
+<tr>
+<td><code>AlbumDetailScreen</code></td>
+<td><code>ui/screen/AlbumDetailScreen.kt</code></td>
+<td>✅</td>
+<td>头部大封面 + 渐变背景</td>
+</tr>
+<tr>
+<td><code>ArtistDetailScreen</code></td>
+<td><code>ui/screen/ArtistDetailScreen.kt</code></td>
+<td>✅</td>
+<td>头部大头像 + 渐变背景</td>
+</tr>
+<tr>
+<td><code>NowPlayingScreen</code></td>
+<td><code>ui/screen/NowPlayingScreen.kt</code></td>
+<td>✅</td>
+<td>动态渐变、共享元素、spring 动效</td>
+</tr>
+<tr>
+<td><code>AppNavigation</code></td>
+<td><code>ui/navigation/AppNavigation.kt</code></td>
+<td>✅</td>
+<td>底部 TabBar、SharedTransitionLayout</td>
+</tr>
+<tr>
+<td><code>MusicListItem</code></td>
+<td><code>ui/component/MusicListItem.kt</code></td>
+<td>🆕</td>
+<td>新建圆角卡片通用组件</td>
+</tr>
+<tr>
+<td><code>PaletteExtractor</code></td>
+<td><code>ui/theme/PaletteExtractor.kt</code></td>
+<td>🆕</td>
+<td>新建封面主色提取工具</td>
+</tr>
+<tr>
+<td><code>MotionDefaults</code></td>
+<td><code>ui/theme/MotionDefaults.kt</code></td>
+<td>🆕</td>
+<td>新建统一动效参数</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="实施顺序风险排序"><a class="markdownIt-Anchor" href="#实施顺序风险排序"></a> 实施顺序（风险排序）</h2>
+<ol>
+<li><strong>第 1 天</strong>：新增依赖（Palette、Haze），刷新 Gradle，确认能编译</li>
+<li><strong>第 2-3 天</strong>：<code>MusicListItem</code> 组件 + <code>SongListScreen</code> 改造，验证圆角卡片视觉</li>
+<li><strong>第 4 天</strong>：<code>LargeTopAppBar</code> 应用到所有 list 页面</li>
+<li><strong>第 5-6 天</strong>：底部 TabBar 重构（改动 AppNavigation 架构）</li>
+<li><strong>第 7 天</strong>：<code>MotionDefaults</code> 替换主要动画</li>
+<li><strong>第 8-10 天</strong>：<code>PaletteExtractor</code> + NowPlayingScreen 沉浸式渐变</li>
+<li><strong>第 11-12 天</strong>：共享元素转场（MiniPlayer → NowPlaying）</li>
+<li><strong>第 13-14 天</strong>：联调测试，补边角（切歌时颜色过渡、滚动性能、深浅色主题适配）</li>
+</ol>
+<hr />
+<h2 id="不在本方案范围"><a class="markdownIt-Anchor" href="#不在本方案范围"></a> 不在本方案范围</h2>
+<p>以下项虽然也属于&quot;仿 Apple Music&quot;，但实现代价过大或优先级偏低，暂不做：</p>
+<ul>
+<li><strong>毛玻璃 TabBar</strong>：iOS 的 TabBar 有半透明模糊背景。需要 Haze 库包整个屏幕，性能和调试代价大。可以第一版先用 <code>NavigationBar</code> 实色背景</li>
+<li><strong>Rubber-band 过滚动</strong>：Android 12+ 的 <code>StretchOverscroll</code> 观感不同，Compose 自定义一个接近 iOS 的 <code>OverscrollEffect</code> 约 300+ 行代码，收益不大</li>
+<li><strong>封面 3D 翻转 / 3D Touch 长按菜单</strong>：iOS 独有交互，Android 没有对应硬件反馈，强行模仿违和</li>
+<li><strong>歌词滚动（带 karaoke 高亮）</strong>：需要歌词解析 + 时间轴同步，归入后续功能迭代</li>
+<li><strong>Now Playing 的&quot;Up Next&quot;下拉队列</strong>：归入 Phase 3 的队列管理重做</li>
+</ul>
+<hr />
+<h2 id="测试清单"><a class="markdownIt-Anchor" href="#测试清单"></a> 测试清单</h2>
+<ul>
+<li>[ ] 冷启动首次打开无封面时（空数据库），UI 不崩溃</li>
+<li>[ ] 切歌时 NowPlayingScreen 背景颜色平滑过渡，不闪白</li>
+<li>[ ] 从 MiniPlayer 点进 NowPlaying 时封面共享转场，无跳变</li>
+<li>[ ] 返回时 NowPlaying 的封面平滑缩回 MiniPlayer 位置</li>
+<li>[ ] 列表滚动 60fps 无掉帧（用 Perfetto 或 Android Studio Profiler 验证）</li>
+<li>[ ] 深色/浅色主题切换立即生效</li>
+<li>[ ] 超长歌名、超长艺术家名字 Ellipsis 正常</li>
+<li>[ ] 超宽屏幕（平板）布局不畸形（可以先放宽要求）</li>
+</ul>
+<hr />
+<h2 id="延伸阅读实施时参考"><a class="markdownIt-Anchor" href="#延伸阅读实施时参考"></a> 延伸阅读（实施时参考）</h2>
+<ul>
+<li>Compose SharedTransitionLayout 官方示例：<a target="_blank" rel="noopener" href="https://developer.android.com/develop/ui/compose/animation/shared-elements">https://developer.android.com/develop/ui/compose/animation/shared-elements</a></li>
+<li>Haze 库文档：<a target="_blank" rel="noopener" href="https://chrisbanes.github.io/haze/">https://chrisbanes.github.io/haze/</a></li>
+<li>AndroidX Palette 官方指南：<a target="_blank" rel="noopener" href="https://developer.android.com/develop/ui/views/graphics/palette-colors">https://developer.android.com/develop/ui/views/graphics/palette-colors</a></li>
+<li>Spring 参数调参感觉：<a target="_blank" rel="noopener" href="https://developer.android.com/jetpack/compose/animation/quick-guide">https://developer.android.com/jetpack/compose/animation/quick-guide</a></li>
+</ul>
+<hr />
+<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
+<ul>
+<li>Apple 的设计版权敏感，本方案只模仿<strong>视觉语言</strong>和<strong>交互模式</strong>，不直接复用任何 Apple Music 的图标、配色规范或字体</li>
+<li>全部改动保持 Material3 组件为底座，避免从零实现一整套 UI 系统</li>
+<li>实施时如果某个细节 Compose 做不好（比如 spring 手感差），宁可用 Material3 原生动画也不要硬做</li>
+</ul>
+
+    </div>
+    <footer class="article-footer">
+        <a class="article-category-link" href="/categories/music-player/" title="music-player" data-aos="zoom-in">music-player</a>
+
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="/tags/%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8/" rel="tag" title="音乐播放器">音乐播放器</a></li></ul>
+
+    </footer>
+  </div>
+    <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
+    <div class="article-nav-link-wrap right">
+          <img data-src="/images/banner.webp" data-sizes="auto" alt="从零开始的自研音乐播放器进程 2" class="lazyload">
+      <a href="/2026/04/11/music-player/01/phase2-implementation/" aria-label="后一篇: 从零开始的自研音乐播放器进程 2"  title="后一篇: 从零开始的自研音乐播放器进程 2"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+          从零开始的自研音乐播放器进程 2
+      </h3>
+    </div>
+  </nav>
+
+</article>
+
+  <section id="comments" data-aos="fade-up">
+    <div class="comment-header">
+        
+      <h2 class="comment-title">说些什么吧！</h2>
+      <div class="comment-selector">
+        <div class="comment-selector-wrap">
+            <div class="selector-item" data-selector="beaudar">
+              <span>beaudar</span>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="comment-content">
+          <div class="comment beaudar-comment" data-aos="fade-up"
+            id="beaudar-comment">
+          </div>
+    </div>
+  </section>
+
+</section>
+        </div>
+        <footer id="footer" aria-label="Site footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    <div>
+      <span class="icon-copyright"></span>
+        2020-2026
+        <span class="footer-info-sep rotate"></span>
+      KyonQi
+    </div>
+      <div>
+        基于&nbsp;<a href="https://hexo.io/" rel="noopener nofollow noreferrer" target="_blank">Hexo</a>&nbsp;
+        Theme.<a href="https://github.com/D-Sketon/hexo-theme-reimu" rel="noopener nofollow noreferrer" target="_blank">Reimu</a>
+      </div>
+      <div>
+        <span class="icon-brush"></span>
+        46.4k
+        &nbsp;|&nbsp;
+        <span class="icon-coffee"></span>
+        03:53
+      </div>
+      <div>
+        <span class="icon-eye"></span>
+        <span id="busuanzi_container_site_pv">总访问量&nbsp;<span id="busuanzi_value_site_pv"></span></span>
+        &nbsp;|&nbsp;
+        <span class="icon-user"></span>
+        <span id="busuanzi_container_site_uv">总访客量&nbsp;<span id="busuanzi_value_site_uv"></span></span>
+      </div>
+  </div>
+</footer>
+
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav" aria-label="Mobile navigation">
+  <div class="sidebar-wrap">
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ui-%E7%BE%8E%E5%8C%96%E6%96%B9%E6%A1%88%E4%BB%BF-apple-music-ios"><span class="toc-number">1.</span> <span class="toc-text"> UI 美化方案：仿 Apple Music (iOS)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="toc-number">1.1.</span> <span class="toc-text"> 设计原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8C%E7%A8%8B%E7%A2%91%E9%AA%8C%E6%94%B6%E6%A0%87%E5%87%86"><span class="toc-number">1.2.</span> <span class="toc-text"> 里程碑验收标准</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E6%96%B0%E5%A2%9E"><span class="toc-number">1.3.</span> <span class="toc-text"> 依赖新增</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#gradlelibsversionstoml"><span class="toc-number">1.3.1.</span> <span class="toc-text"> gradle&#x2F;libs.versions.toml</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#appbuildgradlekts"><span class="toc-number">1.3.2.</span> <span class="toc-text"> app&#x2F;build.gradle.kts</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC-1-%E5%91%A8%E9%AA%A8%E6%9E%B6%E9%87%8D%E6%9E%84"><span class="toc-number">1.4.</span> <span class="toc-text"> 第 1 周：骨架重构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E5%BA%95%E9%83%A8-tabbar-%E6%9B%BF%E6%8D%A2%E9%A1%B6%E9%83%A8-tabrow"><span class="toc-number">1.4.1.</span> <span class="toc-text"> 1.1 底部 TabBar 替换顶部 TabRow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-largetopappbar-%E5%A4%A7%E6%A0%87%E9%A2%98%E6%BB%9A%E5%8A%A8%E8%81%94%E5%8A%A8"><span class="toc-number">1.4.2.</span> <span class="toc-text"> 1.2 LargeTopAppBar + 大标题滚动联动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E5%88%86%E7%BB%84%E5%9C%86%E8%A7%92%E5%88%97%E8%A1%A8%E5%8D%A1%E7%89%87%E6%A0%B7%E5%BC%8F"><span class="toc-number">1.4.3.</span> <span class="toc-text"> 1.3 分组圆角列表卡片样式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC-2-%E5%91%A8%E5%8A%A8%E6%95%88-nowplaying-%E6%B2%89%E6%B5%B8%E5%BC%8F"><span class="toc-number">1.5.</span> <span class="toc-text"> 第 2 周：动效 + NowPlaying 沉浸式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E5%B0%81%E9%9D%A2%E4%B8%BB%E8%89%B2%E6%8F%90%E5%8F%96%E5%B7%A5%E5%85%B7"><span class="toc-number">1.5.1.</span> <span class="toc-text"> 2.1 封面主色提取工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-nowplayingscreen-%E6%B2%89%E6%B5%B8%E5%BC%8F%E9%87%8D%E6%9E%84"><span class="toc-number">1.5.2.</span> <span class="toc-text"> 2.2 NowPlayingScreen 沉浸式重构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%E8%BD%AC%E5%9C%BAminiplayer-nowplaying"><span class="toc-number">1.5.3.</span> <span class="toc-text"> 2.3 共享元素转场：MiniPlayer → NowPlaying</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-spring-%E5%8A%A8%E6%95%88%E5%85%A8%E5%B1%80%E6%9B%BF%E6%8D%A2"><span class="toc-number">1.5.4.</span> <span class="toc-text"> 2.4 Spring 动效全局替换</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E4%BB%B6%E6%A3%80%E6%9F%A5%E8%A1%A8"><span class="toc-number">1.6.</span> <span class="toc-text"> 组件检查表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%96%BD%E9%A1%BA%E5%BA%8F%E9%A3%8E%E9%99%A9%E6%8E%92%E5%BA%8F"><span class="toc-number">1.7.</span> <span class="toc-text"> 实施顺序（风险排序）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E5%9C%A8%E6%9C%AC%E6%96%B9%E6%A1%88%E8%8C%83%E5%9B%B4"><span class="toc-number">1.8.</span> <span class="toc-text"> 不在本方案范围</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E6%B8%85%E5%8D%95"><span class="toc-number">1.9.</span> <span class="toc-text"> 测试清单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB%E5%AE%9E%E6%96%BD%E6%97%B6%E5%8F%82%E8%80%83"><span class="toc-number">1.10.</span> <span class="toc-text"> 延伸阅读（实施时参考）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%87%E6%B3%A8"><span class="toc-number">1.11.</span> <span class="toc-text"> 备注</span></a></li></ol></li></ol>
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="KyonQi" class="lazyload">
+  <div class="sidebar-author-name">KyonQi</div>
+  <div class="sidebar-description">我永远也不会原谅想要写小说的程序员</div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">23</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">4</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">8</div>
+  </div>
+</div>
+<div class="sidebar-social" >
+    <div class="icon-github sidebar-social-icon">
+      <a href=https://github.com/KyonQi itemprop="url" target="_blank" aria-label="github" rel="noopener nofollow noreferrer"></a>
+    </div>
+</div>
+<div class="sidebar-menu">
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="首页"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">首页</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/about" aria-label="关于"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">关于</div>
+      </div>
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+          <div class="sidebar-menu-icon icon rotate">
+              &#xe62b;
+          </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+</div>
+</div>
+  </div>
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+</nav>
+
+    </div>
+      <div class="site-search">
+        <div class="reimu-popup popup">
+          <div class="reimu-search">
+            <div class="reimu-search-input-icon"></div>
+            <div id="reimu-search-input"></div>
+            <div class="popup-btn-close"></div>
+          </div>
+          <div class="reimu-results">
+            <div id="reimu-stats"></div>
+            <div id="reimu-hits"></div>
+            <div id="reimu-pagination" class="reimu-pagination"></div>
+          </div>
+          <img class="reimu-bg" src="/images/reimu.png" loading="lazy" decoding="async" fetchpriority="low"/>
+        </div>
+      </div>
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+<script src="/js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+<script src="/js/pjax_script.js" data-pjax></script>
+
+
+  
+<script src="/js/generator_search.js" defer></script>
+
+
+
+  <script>
+    var setupFirework = () => {
+      if (!false || !window.matchMedia('(max-width: 768px)').matches) {
+        window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--red-1)","var(--red-2)","var(--red-3)","var(--red-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--red-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'));
+      }
+    }
+  </script>
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.2.0/dist/index.umd.js" integrity="sha384-qi9WggRt19tv8Vc7pCHW3ulMNLwrn515zaLEWZjl1px07vz8+pUoWX8n1rgq282T" crossorigin="anonymous" onload="setupFirework()" defer></script>
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "KyonQi",
+          title: "从零开始的自研音乐播放器进程 3 UI 优化",
+          url: "https://kyonqi.github.io/2026/04/16/music-player/01/ui-polish-apple-music/",
+          excerpt: "",
+          description: "",
+          stripContent: " UI 美化方案：仿 Apple Music (iOS)  周期：约 2 周 前置：Phase 2 基础功能完成（已有音乐库浏览、播放器、MiniPlayer） 目标：在保留 Material3 基础组件的前提下，通过自定义组件、动效和视觉语言，让 app 观感接近 Apple Music iOS    设计原则  内容优先：封面图片是视觉核心，其他元素（文字、按钮）都为封面服务 大留白 + 大圆角：间距宽松（1624dp），圆角偏大（1224dp） 弹性动效：所有过渡使用 spring，避免线",
+          date: "Thu Apr 16 2026 18:25:00 GMT+0200",
+          updated: "Thu Apr 16 2026 18:57:47 GMT+0200",
+          cover: "/images/banner.webp",
+        };
+      </script>
+        
+<script src="/js/insert_highlight.js" data-pjax></script>
+
+      
+<script src="/js/tabs.js" data-pjax defer></script>
+
+      <script type="module" data-pjax>
+        (async () => {
+          const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+          const initPswp = (gallery, children) => {
+            if (_$$(`${gallery} ${children}`).length > 0) {
+              new PhotoSwipeLightbox({
+                gallery,
+                children,
+                pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+              }).init();
+            }
+          }
+          const pswp = () => {
+            initPswp('.article-entry', 'a.article-gallery-item');
+            initPswp('.article-gallery', 'a.article-gallery-item');
+          }
+          pswp();
+        })();
+      </script>
+        
+
+<script data-pjax>
+  var loadScript = (src, integrity) => {
+    const script = document.createElement('script');
+    script.src = src;
+    if (integrity) script.integrity = integrity;
+    script.crossOrigin = 'anonymous';
+    return script;
+  };
+
+  var commentConfigKeys = ["beaudar"];
+  var commentConfig = {
+    beaudar: {
+      enable: true,
+      load: () => {
+        const container = document.querySelector('.beaudar-comment'); 
+        if (!container) return;
+        container.style.display = 'block';
+
+        let theme = 'auto';
+        const parsedTheme = theme === 'auto' ? (document.documentElement.getAttribute('data-theme') === 'dark' ? 'github-dark' : 'github-light') : theme;
+
+        // 创建 beaudar 脚本
+        const script = document.createElement('script');
+        script.src = 'https://beaudar.lipk.org/client.js';
+        script.setAttribute('repo', 'KyonQi/KyonQi.github.io');
+        script.setAttribute('branch', 'main');
+        script.setAttribute('theme', parsedTheme);
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+
+        // 透传其他字段
+            script.setAttribute('issue-term', 'title');
+            script.setAttribute('input-position', 'top');
+            script.setAttribute('comment-order', 'desc');
+        
+
+        // 清空容器（防止重复加载）并插入脚本
+        container.innerHTML = '';
+        container.appendChild(script);
+        if (theme === 'auto') {
+          const themeHandler = (e) => {
+            const iframe = container.querySelector('iframe.beaudar-frame');
+            if (!iframe || !iframe.contentWindow) {
+              document.body.removeEventListener('reimu:theme-set', themeHandler);
+              return;
+            }
+            iframe.contentWindow.postMessage({ type: 'set-theme', theme: e.detail.isDark ? 'github-dark' : 'github-light' }, 'https://beaudar.lipk.org');
+          };
+          document.body.addEventListener('reimu:theme-set', themeHandler);
+        }
+      }
+    },
+  }
+  commentConfig.enable = commentConfigKeys.some(key => commentConfig[key].enable);
+
+  var defaultComment = '';
+  if (commentConfig.enable) {
+    // 1. 首先检查localStorage中是否有保存的评论类型
+    var savedCommentType = localStorage.getItem('commentType');
+    
+    // 2. 如果localStorage中有值且对应的评论系统可用，就使用它
+    if (savedCommentType) {
+      if (commentConfig[savedCommentType]?.enable) {
+        defaultComment = savedCommentType;
+      }
+    }
+    
+    // 3. 如果localStorage无效，检查配置的默认评论系统
+    if (!defaultComment) {
+      var configDefault = 'waline';
+      if (commentConfig[configDefault]?.enable) {
+        defaultComment = configDefault;
+      }
+    }
+    
+    // 4. 如果前两项都无效，按指定顺序找到第一个可用的评论系统
+    if (!defaultComment) {
+      defaultComment = commentConfigKeys.find(sys => commentConfig[sys].enable) || '';
+    }
+  }
+  function loadComments() {
+    if (!commentConfig.enable) return;
+    const loadedComments = {
+      valine: false,
+      waline: false,
+      twikoo: false,
+      gitalk: false,
+      giscus: false
+    };
+
+    // 隐藏所有评论容器
+    const hideAllComments = () => {
+      const commentContainers = document.querySelectorAll('.comment');
+      commentContainers.forEach(container => {
+        container.style.display = 'none';
+      });
+    };
+
+    // 按需加载评论系统
+    const loadCommentSystem = (type) => {
+      if (loadedComments[type]) {
+        // 如果已加载，只需显示对应容器
+        document.querySelector(`.${type}-comment`).style.display = 'block';
+        return;
+      }
+
+      // 根据类型加载对应的脚本
+      commentConfig[type]?.load();
+      loadedComments[type] = true;
+    };
+
+    // 评论组件选择器
+    const changeActiveCommentItems = (item) => {
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let i = 0; i < commentItems.length; i++) {
+        commentItems[i].classList.remove('active');
+      }
+      item.classList.add('active');
+
+      // 获取要加载的评论系统类型
+      const commentType = item.getAttribute('data-selector');
+
+      // 隐藏所有评论系统
+      hideAllComments();
+
+      // 加载选中的评论系统
+      loadCommentSystem(commentType);
+    };
+
+    const commentInit = () => {
+      // 评论组件选择器点击事件
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let item of commentItems) {
+        item.addEventListener('click', () => {
+          // 保存选择器状态
+          const commentType = item.getAttribute('data-selector');
+          window.localStorage.setItem('commentType', commentType);
+          // 切换选中状态
+          changeActiveCommentItems(item);
+        });
+      }
+
+      // 检查是否需要加载默认评论系统
+      if (defaultComment) {
+        const defaultSelectorItem = document.querySelector(`[data-selector="${defaultComment}"]`);
+        if (!defaultSelectorItem) return;
+        defaultSelectorItem.style.display = 'block';
+        defaultSelectorItem.classList.add('active');
+        loadCommentSystem(defaultComment);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', commentInit);
+    } else {
+      commentInit();
+    }
+  };
+  loadComments();
+</script>
+
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.12.3' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+  
+<script src="https://npm.webcache.cn/busuanzi@2.3.0/bsz.pure.mini.js" integrity="sha384-0M75wtSkhjIInv4coYlaJU83+OypaRCIq2SukQVQX04eGTCBXJDuWAbJet56id+S" crossorigin="anonymous" async></script>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/katex.min.js" integrity="sha384-MWNUH0WmtsYGhn2cbH6ELRCbf9LG3QDqCC+gqPB3IBNO35xjZK3Ejb6oONRpDbPg" crossorigin="anonymous" defer data-pjax></script>
+
+    
+<script src="https://npm.webcache.cn/katex@0.16.24/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" defer onload="renderMathInElement(_$(&#39;article&#39;), {delimiters: [{left: &#39;$$&#39;, right: &#39;$$&#39;, display: true},{left: &#39;$&#39;, right: &#39;$&#39;, display: false}]});" data-pjax></script>
+
+  
+
+
+  </body>
+  </html>
