@@ -45,6 +45,7 @@
     
 <link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
 
+    <style> #header img, .post-cover img, .post-categories-cover img { object-position: center 15% !important; } #header-title h1 { color: #7a1e2a !important; text-shadow: 0 1px 2px rgba(255,255,255,0.85), 0 0 8px rgba(255,248,240,0.6); font-weight: 700; } #subtitle { color: #3a2a2e !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(255,255,255,0.95), 0 0 6px rgba(255,255,255,0.7); } </style>
 <meta name="generator" content="Hexo 8.1.1"></head>
 
   <body>
@@ -132,7 +133,7 @@
 <header id="header" aria-label="Site header">
         <picture>
         </picture>
-          <img  fetchpriority="high" src="/images/banner.webp" alt="【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考">
+          <img  fetchpriority="high" src="/images/banner1.webp" alt="【CUDA学习】07-GPU 内存访问 —— 矩阵转置思考">
   <div id="header-outer">
     <div id="header-title">
           <span id="logo">
@@ -257,7 +258,7 @@
   </div>
     <nav id="article-nav" aria-label="Article navigation" data-aos="fade-up">
       <div class="article-nav-link-wrap left">
-            <img data-src="/images/banner.webp" data-sizes="auto" alt="【CUDA学习】08-GPU 共享内存" class="lazyload">
+            <img data-src="/images/banner1.webp" data-sizes="auto" alt="【CUDA学习】08-GPU 共享内存" class="lazyload">
         <a href="/2026/03/03/cuda/08/" aria-label="前一篇: 【CUDA学习】08-GPU 共享内存" title="前一篇: 【CUDA学习】08-GPU 共享内存"></a>
         <div class="article-nav-caption">前一篇</div>
         <h3 class="article-nav-title">
@@ -265,7 +266,7 @@
         </h3>
       </div>
     <div class="article-nav-link-wrap right">
-          <img data-src="/images/banner.webp" data-sizes="auto" alt="【CUDA学习】06-GPU CUDA 内存管理" class="lazyload">
+          <img data-src="/images/banner1.webp" data-sizes="auto" alt="【CUDA学习】06-GPU CUDA 内存管理" class="lazyload">
       <a href="/2026/03/02/cuda/06/" aria-label="后一篇: 【CUDA学习】06-GPU CUDA 内存管理"  title="后一篇: 【CUDA学习】06-GPU CUDA 内存管理"></a>
       <div class="article-nav-caption">后一篇</div>
       <h3 class="article-nav-title">
@@ -489,7 +490,7 @@
           stripContent: " 7. 内存访问 —— 矩阵转置思考 矩阵转置，究竟是 “行优先存储” 快，还是 “列优先存储” 快，取决于矩阵大小  💡 如果输入矩阵很大： 硬件内存控制器按 32 字节或 128 字节的缓存行（Cache Line）从全局内存抓取数据。由于是跨步读取，每个缓存行中只有 1 个有效浮点数被物理线程消耗，其余数十个字节的数据被强制载入 L1/L2 缓存后即刻失效。那么自然是 行优先 快。 如果输入矩阵很小： 自然是 列优先快，因为缓存读到的缓存行足以覆盖整个矩阵，而不用浪费带宽在跨步的写上。 ",
           date: "Tue Mar 03 2026 10:25:00 GMT+0100",
           updated: "Thu Mar 05 2026 19:37:43 GMT+0100",
-          cover: "/images/banner.webp",
+          cover: "/images/banner1.webp",
         };
       </script>
         
