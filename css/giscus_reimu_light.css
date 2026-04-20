@@ -5,14 +5,14 @@
 @import url("https://fonts.googleapis.com/css?family=Mulish:400,400italic,700,700italic|Noto Serif SC:400,400italic,700,700italic&display=swap");
 @import url("https://fontsapi.zeoseven.com/292/main/result.css");
 main {
-  --red-0: #ff0000;
-  --red-1: #ff5252;
-  --red-2: #ff7c7c;
-  --red-3: #ffafaf;
-  --red-4: #ffd0d0;
-  --red-5: #ffecec;
-  --red-5-5: #fff3f3;
-  --red-6: #fff7f7;
+  --red-0: #7a1520;
+  --red-1: #bf2d3b;
+  --red-2: #c04856;
+  --red-3: #e08a93;
+  --red-4: #f2b8bd;
+  --red-5: #fae4e7;
+  --red-5-5: #fdeff1;
+  --red-6: #fef7f8;
   --color-prettylights-syntax-comment: #6e7781;
   --color-prettylights-syntax-constant: #0550ae;
   --color-prettylights-syntax-entity: #8250df;

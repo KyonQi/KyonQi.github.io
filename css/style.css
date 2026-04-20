@@ -1,12 +1,12 @@
 :root {
-  --red-0: #ff0000;
-  --red-1: #ff5252;
-  --red-2: #ff7c7c;
-  --red-3: #ffafaf;
-  --red-4: #ffd0d0;
-  --red-5: #ffecec;
-  --red-5-5: #fff3f3;
-  --red-6: #fff7f7;
+  --red-0: #7a1520;
+  --red-1: #bf2d3b;
+  --red-2: #c04856;
+  --red-3: #e08a93;
+  --red-4: #f2b8bd;
+  --red-5: #fae4e7;
+  --red-5-5: #fdeff1;
+  --red-6: #fef7f8;
   --grey-9: #888;
   --grey-7: var(--color-default);
   --color-archive-year: #000;
@@ -24,8 +24,8 @@
   --color-meta-shadow: var(--red-6);
   --color-hover-shadow: rgba(120,120,120,0.15);
   --color-h2-after: var(--red-1);
-  --color-red-6-shadow: rgba(255, 78, 78, 0.6);
-  --color-red-3-shadow: rgba(255, 78, 78, 0.3);
+  --color-red-6-shadow: rgba(168, 35, 48, 0.55);
+  --color-red-3-shadow: rgba(168, 35, 48, 0.28);
   --highlight-nav: #f5f5f5;
   --highlight-scrollbar: #d6d6d6;
   --highlight-background: #fdfdfd;
@@ -57,10 +57,10 @@
 }
 [data-theme='dark']:root {
   --red-0: var(--red-1);
-  --red-4: rgba(255, 208, 208, 0.5);
-  --red-5: rgba(255,228,228,0.15);
-  --red-5-5: rgba(255,236,236,0.05);
-  --red-6: rgba(255, 243, 243, 0.2);
+  --red-4: rgba(242, 184, 189, 0.5);
+  --red-5: rgba(250, 228, 231, 0.15);
+  --red-5-5: rgba(253, 239, 241, 0.05);
+  --red-6: rgba(254, 247, 248, 0.2);
   --color-archive-year: #999;
   --color-default: #999;
   --color-border: var(--red-5);
