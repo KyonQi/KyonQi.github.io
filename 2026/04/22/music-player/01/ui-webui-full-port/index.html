@@ -9,7 +9,7 @@
   
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_a0oqhord1y';window.REIMU_CONFIG.clipboard_tips = {"success":{"zh-CN,en,zh-TW,default":"Copy successfully (*^▽^*)"},"fail":{"zh-CN,en,zh-TW,default":"Copy failed (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'https://kyonqi.github.io';</script>
   <title>
-    从零开始的自研音乐播放器进程 3.3 UI BottomBar 折叠 | KyonQi&#39;s Blog
+    从零开始的自研音乐播放器进程 3.4 UI 重构 | KyonQi&#39;s Blog
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="preload" as="style" href="https://fontsapi.zeoseven.com/292/main/result.css" onload="this.rel='stylesheet'" crossorigin>
@@ -20,13 +20,13 @@
 
     <meta name="description" content="WebUI 1:1 移植工程文档  目标：把 WebUI&#x2F; 文件夹里的 React 原型完全复刻到 Android Kotlin Compose 原生实现，达到视觉 pixel-level 一致。 唯一&quot;不完全复刻&quot;的地方是：动态强调色（dynamic accent）会真实影响按钮、进度条、滑动条的颜色（WebUI 已这么做，原生要保留这个行为）。    0. 总览  0.1">
 <meta property="og:type" content="article">
-<meta property="og:title" content="从零开始的自研音乐播放器进程 3.3 UI BottomBar 折叠">
+<meta property="og:title" content="从零开始的自研音乐播放器进程 3.4 UI 重构">
 <meta property="og:url" content="https://kyonqi.github.io/2026/04/22/music-player/01/ui-webui-full-port/index.html">
 <meta property="og:site_name" content="KyonQi&#39;s Blog">
 <meta property="og:description" content="WebUI 1:1 移植工程文档  目标：把 WebUI&#x2F; 文件夹里的 React 原型完全复刻到 Android Kotlin Compose 原生实现，达到视觉 pixel-level 一致。 唯一&quot;不完全复刻&quot;的地方是：动态强调色（dynamic accent）会真实影响按钮、进度条、滑动条的颜色（WebUI 已这么做，原生要保留这个行为）。    0. 总览  0.1">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-04-22T21:25:00.000Z">
-<meta property="article:modified_time" content="2026-04-22T22:32:49.307Z">
+<meta property="article:modified_time" content="2026-04-22T23:29:15.053Z">
 <meta property="article:author" content="KyonQi">
 <meta property="article:tag" content="音乐播放器">
 <meta name="twitter:card" content="summary">
@@ -131,11 +131,11 @@
 <header id="header" aria-label="Site header">
         <picture>
         </picture>
-          <img  fetchpriority="high" src="/images/banner1.webp" alt="从零开始的自研音乐播放器进程 3.3 UI BottomBar 折叠">
+          <img  fetchpriority="high" src="/images/banner1.webp" alt="从零开始的自研音乐播放器进程 3.4 UI 重构">
   <div id="header-outer">
     <div id="header-title">
           <span id="logo">
-            <h1 data-aos="slide-up">从零开始的自研音乐播放器进程 3.3 UI BottomBar 折叠</h1>
+            <h1 data-aos="slide-up">从零开始的自研音乐播放器进程 3.4 UI 重构</h1>
           </span>
         <h2 id="subtitle-wrap" data-aos="slide-down">
         </h2>
@@ -1052,13 +1052,13 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "KyonQi",
-          title: "从零开始的自研音乐播放器进程 3.3 UI BottomBar 折叠",
+          title: "从零开始的自研音乐播放器进程 3.4 UI 重构",
           url: "https://kyonqi.github.io/2026/04/22/music-player/01/ui-webui-full-port/",
           excerpt: "",
           description: "",
           stripContent: " WebUI 1:1 移植工程文档  目标：把 WebUI/ 文件夹里的 React 原型完全复刻到 Android Kotlin Compose 原生实现，达到视觉 pixel-level 一致。 唯一&amp;quot;不完全复刻&amp;quot;的地方是：动态强调色（dynamic accent）会真实影响按钮、进度条、滑动条的颜色（WebUI 已这么做，原生要保留这个行为）。    0. 总览  0.1 WebUI 的视觉语言（要复刻的核心）    要素 WebUI 现状 当前原生实现     字体 ",
           date: "Wed Apr 22 2026 23:25:00 GMT+0200",
-          updated: "Thu Apr 23 2026 00:32:49 GMT+0200",
+          updated: "Thu Apr 23 2026 01:29:15 GMT+0200",
           cover: "/images/banner1.webp",
         };
       </script>
